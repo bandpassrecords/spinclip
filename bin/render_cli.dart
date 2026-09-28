@@ -61,6 +61,11 @@ Future<void> main(List<String> arguments) async {
     )
     ..addOption('color', help: 'Visualizer color (0xRRGGBB)', defaultsTo: '0x33CCFF')
     ..addOption('blur', help: 'Background blur radius', defaultsTo: '20')
+    ..addFlag(
+      'vintage',
+      help: 'Mild old-school aging look on the whole frame: warm sepia tint, slight vignette, light film grain.',
+      defaultsTo: false,
+    )
     ..addOption(
       'cover-size',
       help: 'Sharp cover size as a fraction (0.2-1.0) of the shorter frame side',
@@ -154,6 +159,7 @@ Future<void> main(List<String> arguments) async {
     fadeOutSeconds: double.parse(args['fade-out'] as String),
     visualizerSmoothness: double.parse(args['smoothness'] as String),
     losslessAudio: args['lossless-audio'] as bool,
+    vintageEffect: args['vintage'] as bool,
   );
 
   final useHardwareAcceleration = args['hw-accel'] as bool;

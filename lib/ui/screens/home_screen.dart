@@ -100,6 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (draft.showLogo) l10n.elementLogo,
       if (draft.showText) l10n.elementText,
       if (draft.showQrCode) l10n.elementQrCode,
+      if (draft.vintageEffect) l10n.vintageEffectLabel,
     ];
     return elements.isEmpty ? l10n.summaryElementsNone : elements.join(', ');
   }
@@ -271,6 +272,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               visualizerSmoothness: draft.visualizerSmoothness,
               onVisualizerSmoothnessChanged:
                   draftNotifier.setVisualizerSmoothness,
+              visualizerColorHex: draft.visualizerColorHex,
+              onVisualizerColorChanged: draftNotifier.setColor,
+              coverImagePath: draft.imagePath,
+              vintageEffect: draft.vintageEffect,
+              onVintageEffectChanged: draftNotifier.setVintageEffect,
               showCover: draft.showCover,
               onShowCoverChanged: draftNotifier.setShowCover,
               coverSizeFraction: draft.coverSizeFraction,

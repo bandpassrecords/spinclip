@@ -3,12 +3,18 @@ import 'package:flutter/material.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../models/qr_caption_position.dart';
 import 'file_drop_target.dart';
+import 'visualizer_color_picker.dart';
 
 class CustomizationPanel extends StatelessWidget {
   final double blurRadius;
   final ValueChanged<double> onBlurChanged;
   final double visualizerSmoothness;
   final ValueChanged<double> onVisualizerSmoothnessChanged;
+  final String visualizerColorHex;
+  final ValueChanged<String> onVisualizerColorChanged;
+  final String? coverImagePath;
+  final bool vintageEffect;
+  final ValueChanged<bool> onVintageEffectChanged;
   final bool showCover;
   final ValueChanged<bool> onShowCoverChanged;
   final double coverSizeFraction;
@@ -40,6 +46,11 @@ class CustomizationPanel extends StatelessWidget {
     required this.onBlurChanged,
     required this.visualizerSmoothness,
     required this.onVisualizerSmoothnessChanged,
+    required this.visualizerColorHex,
+    required this.onVisualizerColorChanged,
+    required this.coverImagePath,
+    required this.vintageEffect,
+    required this.onVintageEffectChanged,
     required this.showCover,
     required this.onShowCoverChanged,
     required this.coverSizeFraction,
@@ -90,6 +101,20 @@ class CustomizationPanel extends StatelessWidget {
           label: '${(visualizerSmoothness * 100).round()}%',
           onChanged: onVisualizerSmoothnessChanged,
         ),
+        const SizedBox(height: 8),
+        VisualizerColorPicker(
+          colorHex: visualizerColorHex,
+          onColorChanged: onVisualizerColorChanged,
+          coverImagePath: coverImagePath,
+        ),
+        const SizedBox(height: 8),
+        SwitchListTile(
+          title: Text(l10n.vintageEffectLabel),
+          subtitle: Text(l10n.vintageEffectSubtitle),
+          value: vintageEffect,
+          onChanged: onVintageEffectChanged,
+        ),
+        const Divider(height: 24),
         SwitchListTile(
           title: Text(l10n.showCoverArt),
           value: showCover,

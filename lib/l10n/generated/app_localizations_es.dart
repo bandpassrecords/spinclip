@@ -327,24 +327,24 @@ class AppLocalizationsEs extends AppLocalizations {
   String get resetPositions => 'Restablecer posiciones';
 
   @override
-  String get visualizerColorLabel => 'Visualizer color';
+  String get visualizerColorLabel => 'Color del visualizador';
 
   @override
-  String get colorThemeAuto => 'Auto (from cover)';
+  String get colorThemeAuto => 'Automático (de la portada)';
 
   @override
-  String get colorThemeDark => 'Dark';
+  String get colorThemeDark => 'Oscuro';
 
   @override
-  String get colorThemeSparkling => 'Sparkling';
+  String get colorThemeSparkling => 'Chispeante';
 
   @override
-  String get extractingColor => 'Extracting color...';
+  String get extractingColor => 'Extrayendo color...';
 
   @override
-  String get vintageEffectLabel => 'Vintage look';
+  String get vintageEffectLabel => 'Efecto vintage';
 
   @override
   String get vintageEffectSubtitle =>
-      'Mild old-school aging: warm tone, soft vignette, light film grain.';
+      'Envejecimiento leve: tono cálido, viñeta suave, grano de película ligero.';
 }

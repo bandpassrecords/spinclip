@@ -106,5 +106,13 @@
   "summaryOff": "Desactivado",
   "summaryPlatformsNone": "Ninguna seleccionada",
   "openOutputFolder": "Abrir carpeta",
-  "resetPositions": "Restablecer posiciones"
+  "resetPositions": "Restablecer posiciones",
+
+  "visualizerColorLabel": "Color del visualizador",
+  "colorThemeAuto": "Automático (de la portada)",
+  "colorThemeDark": "Oscuro",
+  "colorThemeSparkling": "Chispeante",
+  "extractingColor": "Extrayendo color...",
+  "vintageEffectLabel": "Efecto vintage",
+  "vintageEffectSubtitle": "Envejecimiento leve: tono cálido, viñeta suave, grano de película ligero."
 }
