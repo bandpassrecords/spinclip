@@ -1,0 +1,283 @@
+name: Flutter CI/CD (Windows, macOS, Linux)
+
+# Needed for the upload-release-asset action to attach build artifacts to a
+# GitHub Release.
+permissions:
+  contents: write
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+  push:
+    branches: [ main ]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
+env:
+  FLUTTER_VERSION: 3.41.4
+
+jobs:
+  # Runs on every PR, every push to main, and every tag - the one gate
+  # everything else depends on.
+  unit_tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # CHANGELOG.md ships as the release's own record of what changed, so
+      # the entry for a release has to exist in the commit being tagged, not
+      # be added afterward. Without this check, forgetting the entry ships a
+      # release with no changelog for that version until someone notices.
+      # Add one with: scripts/release.sh <version> (checks this same thing
+      # locally before it lets you tag).
+      - name: Verify CHANGELOG has an entry for the tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          if ! grep -qE "^## v${TAG_VERSION}( |$)" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## v${TAG_VERSION}' entry. Add one before tagging."
+            exit 1
+          fi
+          echo "CHANGELOG.md has an entry for v${TAG_VERSION}"
+
+      - name: Setup Flutter ${{ env.FLUTTER_VERSION }} (Stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+  # Smoke-tests that a PR still builds for Windows (the platform this repo is
+  # developed on) and hands testers a build to try, without needing a tag.
+  test_pr_build:
+    name: Test PR Build (Windows)
+    needs: unit_tests
+    if: github.event_name == 'pull_request'
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter ${{ env.FLUTTER_VERSION }} (Stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Test
+        run: flutter build windows --release
+
+      - name: Upload portable Windows build (PR only)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Spinclip_Windows_pr${{ github.event.pull_request.number }}
+          path: build/windows/x64/runner/Release/
+          retention-days: 7
+
+  # Windows + macOS release builds, tag-triggered only. Ships as a plain,
+  # unsigned zip of the Flutter release bundle - no installer/MSIX packaging
+  # and no macOS code signing/notarization (neither needs any repo secrets
+  # today). macOS will show an "unidentified developer" warning on first
+  # launch until signing is added - revisit if/when this ships to the App
+  # Store or otherwise needs a smoother first-run experience.
+  release_build_upload:
+    name: Build & Upload (${{ matrix.os_name }})
+    needs: unit_tests
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            os_name: Windows
+            command: flutter build windows --release
+            build_dir: build/windows/x64/runner/Release
+          - os: macos-latest
+            os_name: macOS
+            command: flutter build macos --release
+            build_dir: build/macos/Build/Products/Release
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter ${{ env.FLUTTER_VERSION }} (Stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Determine build version (strip leading v from tag)
+        id: build_version
+        shell: bash
+        run: echo "version_name=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build ${{ matrix.os_name }}
+        shell: bash
+        run: ${{ matrix.command }} --build-name=${{ steps.build_version.outputs.version_name }}
+
+      - name: Zip Windows build
+        if: matrix.os_name == 'Windows'
+        shell: pwsh
+        run: |
+          $zipName = "Spinclip_Windows_${{ github.ref_name }}.zip"
+          Compress-Archive -Path "${{ matrix.build_dir }}\*" -DestinationPath $zipName
+
+      - name: Zip macOS app bundle
+        if: matrix.os_name == 'macOS'
+        run: |
+          zip -r "Spinclip_macOS_${{ github.ref_name }}.zip" "${{ matrix.build_dir }}/spinclip.app"
+
+      - name: Generate SHA256 checksum (Windows)
+        if: matrix.os_name == 'Windows'
+        shell: pwsh
+        run: |
+          $zipName = "Spinclip_Windows_${{ github.ref_name }}.zip"
+          $hash = (Get-FileHash $zipName -Algorithm SHA256).Hash.ToLower()
+          "$hash  $zipName" | Out-File -Encoding ascii "$zipName.sha256"
+
+      - name: Generate SHA256 checksum (macOS)
+        if: matrix.os_name == 'macOS'
+        run: |
+          zipName="Spinclip_macOS_${{ github.ref_name }}.zip"
+          shasum -a 256 "$zipName" | awk '{print $1"  "$2}' > "$zipName.sha256"
+
+      - name: Find Existing Release URL
+        id: find_release
+        uses: actions/github-script@v6
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        with:
+          script: |
+            try {
+              const { data: release } = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: process.env.RELEASE_TAG,
+              });
+              core.setOutput('upload_url', release.upload_url);
+            } catch (error) {
+              core.setFailed(`Release with tag ${process.env.RELEASE_TAG} not found. Create a Release manually on GitHub matching this tag before pushing it.`);
+            }
+
+      - name: Upload ${{ matrix.os_name }} Release Asset
+        if: steps.find_release.outputs.upload_url != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.find_release.outputs.upload_url }}
+          asset_path: Spinclip_${{ matrix.os_name }}_${{ github.ref_name }}.zip
+          asset_name: Spinclip_${{ matrix.os_name }}_${{ github.ref_name }}.zip
+          asset_content_type: application/zip
+
+      - name: Upload ${{ matrix.os_name }} SHA256 Checksum
+        if: steps.find_release.outputs.upload_url != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.find_release.outputs.upload_url }}
+          asset_path: Spinclip_${{ matrix.os_name }}_${{ github.ref_name }}.zip.sha256
+          asset_name: Spinclip_${{ matrix.os_name }}_${{ github.ref_name }}.zip.sha256
+          asset_content_type: text/plain
+
+  # Plain tarball of the Flutter Linux bundle - a normal `flutter build linux`
+  # like any other platform, no packaging format (AppImage/Flatpak/deb) yet.
+  build_linux:
+    name: Build & Upload (Linux)
+    needs: unit_tests
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+
+      - name: Setup Flutter ${{ env.FLUTTER_VERSION }} (Stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Determine build version (strip leading v from tag)
+        id: build_version
+        run: echo "version_name=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Linux Bundle
+        run: flutter build linux --release --build-name="${{ steps.build_version.outputs.version_name }}"
+
+      - name: Package tarball
+        run: |
+          ASSET_NAME="Spinclip_Linux_${{ github.ref_name }}.tar.gz"
+          tar -C build/linux/x64/release/bundle -czf "$ASSET_NAME" .
+          echo "asset_name=$ASSET_NAME" >> "$GITHUB_OUTPUT"
+        id: package
+
+      - name: Generate SHA256 checksum
+        run: |
+          CHECKSUM=$(sha256sum "${{ steps.package.outputs.asset_name }}" | awk '{print $1}')
+          echo "$CHECKSUM  ${{ steps.package.outputs.asset_name }}" > "${{ steps.package.outputs.asset_name }}.sha256"
+
+      - name: Find Existing Release URL
+        id: find_release
+        uses: actions/github-script@v6
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        with:
+          script: |
+            try {
+              const { data: release } = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: process.env.RELEASE_TAG,
+              });
+              core.setOutput('upload_url', release.upload_url);
+            } catch (error) {
+              core.setFailed(`Release with tag ${process.env.RELEASE_TAG} not found. Create a Release manually on GitHub matching this tag before pushing it.`);
+            }
+
+      - name: Upload Linux Release Asset
+        if: steps.find_release.outputs.upload_url != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.find_release.outputs.upload_url }}
+          asset_path: ${{ steps.package.outputs.asset_name }}
+          asset_name: ${{ steps.package.outputs.asset_name }}
+          asset_content_type: application/gzip
+
+      - name: Upload Linux SHA256 Checksum
+        if: steps.find_release.outputs.upload_url != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.find_release.outputs.upload_url }}
+          asset_path: ${{ steps.package.outputs.asset_name }}.sha256
+          asset_name: ${{ steps.package.outputs.asset_name }}.sha256
+          asset_content_type: text/plain

@@ -1,0 +1,179 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Spinclip",
+
+  "stepReleaseType": "Release type",
+  "stepFiles": "Files",
+  "stepVisualizer": "Visualizer",
+  "stepCustomize": "Customize",
+  "stepDuration": "Duration",
+  "stepPlatforms": "Platforms",
+  "stepOutputPerformance": "Output & performance",
+  "stepReviewRender": "Review & render",
+  "stepIndicator": "Step {current} of {total}: {stepName}",
+  "@stepIndicator": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"},
+      "stepName": {"type": "String"}
+    }
+  },
+  "back": "Back",
+  "next": "Next",
+  "preview": "Preview",
+  "previewPresetLabel": "{presetName} ({aspectRatio})",
+  "@previewPresetLabel": {
+    "placeholders": {
+      "presetName": {"type": "String"},
+      "aspectRatio": {"type": "String"}
+    }
+  },
+
+  "releaseModeSingle": "Single song",
+  "releaseModeMultiSong": "Multiple songs",
+  "releaseModeMedley": "Medley",
+
+  "coverImageLabelSingle": "Cover image (PNG/JPG)",
+  "coverImageLabelMulti": "Default cover image (used unless a song overrides it)",
+  "audioFileLabel": "Audio file (WAV/MP3/FLAC...)",
+  "medleyExplanation": "Each song contributes a short excerpt; they play back to back as one combined video per platform.",
+  "multiSongExplanation": "Each song renders its own independent output video, for every selected platform.",
+
+  "positionAndRotate": "Position & rotate",
+  "positionCanvasHint": "Drag to position. Tap an element to adjust its rotation.",
+  "rotationLabel": "{label} rotation: {degrees}°",
+  "@rotationLabel": {
+    "placeholders": {
+      "label": {"type": "String"},
+      "degrees": {"type": "int"}
+    }
+  },
+  "elementCover": "Cover",
+  "elementLogo": "Logo",
+  "elementText": "Text",
+  "elementQrCode": "QR code",
+
+  "backgroundBlurLabel": "Background blur: {value}",
+  "@backgroundBlurLabel": {
+    "placeholders": {"value": {"type": "int"}}
+  },
+  "visualizerSmoothnessLabel": "Visualizer smoothness: {percent}%",
+  "@visualizerSmoothnessLabel": {
+    "placeholders": {"percent": {"type": "int"}}
+  },
+  "showCoverArt": "Show cover art",
+  "coverSizeLabel": "Cover size: {percent}%",
+  "@coverSizeLabel": {
+    "placeholders": {"percent": {"type": "int"}}
+  },
+  "showLogo": "Show logo",
+  "logoImage": "Logo image",
+  "showTextOverlay": "Show text overlay",
+  "overlayText": "Overlay text",
+  "showQrCode": "Show QR code",
+  "qrCodeSubtitle": "Links to a URL of your choice (e.g. a Spotify/streaming link)",
+  "qrCodeContentLabel": "QR code content (URL or text)",
+  "qrCaptionLabel": "QR caption (optional, e.g. \"Scan to listen\")",
+  "qrCaptionPositionBelow": "Below QR code",
+  "qrCaptionPositionAbove": "Above QR code",
+  "fadeInLabel": "Fade in: {seconds}s",
+  "@fadeInLabel": {
+    "placeholders": {"seconds": {"type": "String"}}
+  },
+  "fadeOutLabel": "Fade out: {seconds}s",
+  "@fadeOutLabel": {
+    "placeholders": {"seconds": {"type": "String"}}
+  },
+
+  "dropFileHint": "{label} - click or drop a file here",
+  "@dropFileHint": {
+    "placeholders": {"label": {"type": "String"}}
+  },
+
+  "fullDuration": "Full duration",
+  "fullDurationSubtitle": "Use the entire track (default). Turn off to pick an excerpt.",
+  "probingTrackLength": "Probing track length...",
+  "trimRangeLabel": "{start} - {end} ({duration}s)",
+  "@trimRangeLabel": {
+    "placeholders": {
+      "start": {"type": "String"},
+      "end": {"type": "String"},
+      "duration": {"type": "String"}
+    }
+  },
+  "previewExcerptButton": "Preview the selected excerpt",
+
+  "addSong": "Add song",
+  "trackStartSeconds": "Start (s)",
+  "trackExcerptDuration": "Excerpt duration (s)",
+
+  "outputDirectoryDefault": "Default (Documents/Spinclip) - click to change",
+
+  "hardwareAcceleration": "Hardware-accelerated encoding",
+  "hardwareAccelerationSubtitle": "Uses your GPU (NVENC/Quick Sync/AMF) when available; falls back to software encoding automatically if it fails.",
+  "losslessAudio": "Lossless audio (PCM)",
+  "losslessAudioSubtitle": "No audio compression - writes a .mov file instead of .mp4. Spotify Canvas always uses AAC/MP4 regardless, since that platform requires it.",
+
+  "renderButton": "Render",
+  "renderingPreview": "Rendering preview...",
+  "renderingGeneric": "Rendering...",
+  "selectCoverAndAudioFirst": "Select a cover image and audio first",
+  "renderProgressLabel": "[{index}/{count}] {presetName}: {percent}%",
+  "@renderProgressLabel": {
+    "placeholders": {
+      "index": {"type": "int"},
+      "count": {"type": "int"},
+      "presetName": {"type": "String"},
+      "percent": {"type": "String"}
+    }
+  },
+  "cancel": "Cancel",
+  "renderDone": "Done! Saved to: {path}",
+  "@renderDone": {
+    "placeholders": {"path": {"type": "String"}}
+  },
+  "renderError": "Error: {message}",
+  "@renderError": {
+    "placeholders": {"message": {"type": "String"}}
+  },
+  "renderCancelled": "Cancelled.",
+
+  "visualizerPlacementLabel": "Visualizer placement",
+  "visualizerStyleLabel": "Visualizer style",
+
+  "placementBottomBand": "Bottom Band",
+  "placementSideBorder": "Side Border",
+  "placementDualMirroredBottom": "Dual Mirrored Bottom",
+  "placementFullFrameBorder": "Full Frame Border",
+  "placementAscendingCorner": "Ascending Corner",
+  "placementCenteredBehindText": "Centered Behind Text",
+  "placementCoverCenterDualBars": "Cover Center + Side Bars",
+
+  "styleBars": "Bars",
+  "styleLineSpectrum": "Line Spectrum",
+  "styleFluidWave": "Fluid Wave",
+  "styleOscilloscope": "Oscilloscope",
+
+  "reviewSummaryTitle": "Summary",
+  "reviewEditTooltip": "Edit",
+  "summaryValueNotSet": "Not set",
+  "summaryTrackCount": "{count} tracks",
+  "@summaryTrackCount": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "summaryElementsNone": "None",
+  "summaryOn": "On",
+  "summaryOff": "Off",
+  "summaryPlatformsNone": "None selected",
+  "openOutputFolder": "Open folder",
+  "resetPositions": "Reset positions",
+
+  "visualizerColorLabel": "Visualizer color",
+  "colorThemeAuto": "Auto (from cover)",
+  "colorThemeDark": "Dark",
+  "colorThemeSparkling": "Sparkling",
+  "extractingColor": "Extracting color...",
+  "vintageEffectLabel": "Vintage look",
+  "vintageEffectSubtitle": "Mild old-school aging: warm tone, soft vignette, light film grain."
+}

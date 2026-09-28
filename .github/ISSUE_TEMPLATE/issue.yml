@@ -1,0 +1,106 @@
+name: Report an Issue
+description: Report a bug or suggest an improvement
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to open an issue! Please fill out the sections below as completely as you can.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - Bug report
+        - Feature request
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What went wrong, or what would you like to see?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: For bugs — what did you do, step by step?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+    validations:
+      required: false
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+    validations:
+      required: false
+
+  - type: input
+    id: app-version
+    attributes:
+      label: App Version
+      placeholder: e.g. 0.1.0
+    validations:
+      required: false
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Not applicable
+    validations:
+      required: false
+
+  - type: input
+    id: mode
+    attributes:
+      label: Render mode (if relevant)
+      description: Single song / Multiple songs / Medley, and which visualizer placement + style
+      placeholder: e.g. Medley, side-border + fluid-wave
+    validations:
+      required: false
+
+  - type: textarea
+    id: ffmpeg-log
+    attributes:
+      label: FFmpeg error output (if a render failed)
+      description: The error message shown in the app, or the ffmpeg stderr log if you ran the CLI.
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Screenshots, sample files, or anything else that might help.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this hasn't been reported yet
+          required: true
