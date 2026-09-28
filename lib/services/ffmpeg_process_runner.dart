@@ -41,18 +41,24 @@ class FfmpegProcessRunner {
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((line) {
-      stderrBuffer.writeln(line);
-      onStderrLine?.call(line);
-    });
+          stderrBuffer.writeln(line);
+          onStderrLine?.call(line);
+        });
 
     final exitCode = await process.exitCode;
     await stderrSub.cancel();
     _process = null;
 
     if (_cancelled) {
-      return FfmpegRunResult(exitCode: -1, stderrLog: 'Cancelled by user.\n${stderrBuffer.toString()}');
+      return FfmpegRunResult(
+        exitCode: -1,
+        stderrLog: 'Cancelled by user.\n${stderrBuffer.toString()}',
+      );
     }
-    return FfmpegRunResult(exitCode: exitCode, stderrLog: stderrBuffer.toString());
+    return FfmpegRunResult(
+      exitCode: exitCode,
+      stderrLog: stderrBuffer.toString(),
+    );
   }
 
   void cancel() {

@@ -175,5 +175,18 @@
   "colorThemeSparkling": "Sparkling",
   "extractingColor": "Extracting color...",
   "vintageEffectLabel": "Vintage look",
-  "vintageEffectSubtitle": "Mild old-school aging: warm tone, soft vignette, light film grain."
+  "vintageEffectSubtitle": "Mild old-school aging: warm tone, soft vignette, light film grain.",
+
+  "filesStepRequiredHint": "A cover image and audio are required to continue.",
+
+  "trackDefaultCoverHint": "Uses the default cover",
+  "trackSetCover": "Set cover",
+  "trackClearCoverTooltip": "Remove custom cover",
+
+  "loadTemplateButton": "Load template",
+  "saveAsTemplateButton": "Save as template",
+  "templateNameLabel": "Template name",
+  "noTemplatesSaved": "No saved templates yet",
+  "deleteTemplateTooltip": "Delete template",
+  "save": "Save"
 }

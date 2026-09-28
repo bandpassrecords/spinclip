@@ -114,5 +114,18 @@
   "colorThemeSparkling": "Cintilante",
   "extractingColor": "Extraindo cor...",
   "vintageEffectLabel": "Efeito vintage",
-  "vintageEffectSubtitle": "Envelhecimento leve: tom quente, vinheta suave, granulado de filme leve."
+  "vintageEffectSubtitle": "Envelhecimento leve: tom quente, vinheta suave, granulado de filme leve.",
+
+  "filesStepRequiredHint": "É necessário selecionar uma imagem de capa e um áudio para continuar.",
+
+  "trackDefaultCoverHint": "Usa a capa padrão",
+  "trackSetCover": "Definir capa",
+  "trackClearCoverTooltip": "Remover capa personalizada",
+
+  "loadTemplateButton": "Carregar modelo",
+  "saveAsTemplateButton": "Salvar como modelo",
+  "templateNameLabel": "Nome do modelo",
+  "noTemplatesSaved": "Nenhum modelo salvo ainda",
+  "deleteTemplateTooltip": "Excluir modelo",
+  "save": "Salvar"
 }

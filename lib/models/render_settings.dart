@@ -234,16 +234,34 @@ class RenderSettings {
 
   @override
   int get hashCode => Object.hash(
-        imagePath,
-        audioPath,
-        placement,
-        style,
-        visualizerColorHex,
-        Object.hash(blurRadius, visualizerSmoothness, showCover, coverSizeFraction, coverTransform),
-        Object.hash(showLogo, logoImagePath, logoTransform),
-        Object.hash(showText, textContent, textTransform),
-        Object.hash(showQrCode, qrCodeContent, qrCaptionText, qrCaptionPosition, qrTransform),
-        Object.hash(fadeInSeconds, fadeOutSeconds),
-        Object.hash(fullDuration, trimStartSeconds, trimDurationSeconds, losslessAudio, vintageEffect),
-      );
+    imagePath,
+    audioPath,
+    placement,
+    style,
+    visualizerColorHex,
+    Object.hash(
+      blurRadius,
+      visualizerSmoothness,
+      showCover,
+      coverSizeFraction,
+      coverTransform,
+    ),
+    Object.hash(showLogo, logoImagePath, logoTransform),
+    Object.hash(showText, textContent, textTransform),
+    Object.hash(
+      showQrCode,
+      qrCodeContent,
+      qrCaptionText,
+      qrCaptionPosition,
+      qrTransform,
+    ),
+    Object.hash(fadeInSeconds, fadeOutSeconds),
+    Object.hash(
+      fullDuration,
+      trimStartSeconds,
+      trimDurationSeconds,
+      losslessAudio,
+      vintageEffect,
+    ),
+  );
 }

@@ -10,6 +10,7 @@ import '../models/qr_caption_position.dart';
 import '../models/release_mode.dart';
 import '../models/render_progress.dart';
 import '../models/render_settings.dart';
+import '../models/render_template.dart';
 import '../models/track.dart';
 import '../models/visualizer_placement.dart';
 import '../models/visualizer_style.dart';
@@ -21,6 +22,7 @@ import '../services/medley_render_service.dart';
 import '../services/multi_song_batch_service.dart';
 import '../services/preview_service.dart';
 import '../services/qr_code_service.dart';
+import '../services/template_store_service.dart';
 import '../services/video_render_service.dart';
 
 class DraftSettings {
@@ -103,15 +105,23 @@ class DraftSettings {
     this.vintageEffect = false,
   });
 
+  /// Whether every track supplies its own cover, making the shared/default
+  /// image optional - lets a multi-song/medley batch mix different covers
+  /// per song (each its own "release") instead of all sharing one image.
+  bool get _tracksCoverThemselves =>
+      tracks.isNotEmpty && tracks.every((t) => t.imagePath != null);
+
   bool get isReadyToRender {
-    if (imagePath == null || selectedPresetIds.isEmpty) return false;
+    if (selectedPresetIds.isEmpty) return false;
     switch (releaseMode) {
       case ReleaseMode.single:
-        return audioPath != null;
+        return imagePath != null && audioPath != null;
       case ReleaseMode.multiSong:
-        return tracks.isNotEmpty;
+        return tracks.isNotEmpty &&
+            (imagePath != null || _tracksCoverThemselves);
       case ReleaseMode.medley:
-        return tracks.length >= 2;
+        return tracks.length >= 2 &&
+            (imagePath != null || _tracksCoverThemselves);
     }
   }
 
@@ -152,9 +162,12 @@ class DraftSettings {
 
   /// The shared template (placement/style/color/blur/logo/text/QR/fades)
   /// used as a base for each track's RenderSettings in multi-song/medley mode.
+  /// `imagePath` here is a placeholder only - RenderSettings.forTrack always
+  /// overrides it with the track's own image or the real default, so this
+  /// template's own imagePath is never actually rendered.
   RenderSettings toTemplateSettings() {
     return RenderSettings(
-      imagePath: imagePath!,
+      imagePath: imagePath ?? '',
       audioPath: '',
       placement: placement,
       style: style,
@@ -182,8 +195,9 @@ class DraftSettings {
     );
   }
 
-  List<PlatformPreset> get selectedPresets =>
-      PlatformPreset.all.where((preset) => selectedPresetIds.contains(preset.id)).toList();
+  List<PlatformPreset> get selectedPresets => PlatformPreset.all
+      .where((preset) => selectedPresetIds.contains(preset.id))
+      .toList();
 
   DraftSettings copyWith({
     ReleaseMode? releaseMode,
@@ -226,9 +240,11 @@ class DraftSettings {
       releaseMode: releaseMode ?? this.releaseMode,
       imagePath: imagePath ?? this.imagePath,
       audioPath: audioPath ?? this.audioPath,
-      probedAudioDurationSeconds: probedAudioDurationSeconds ?? this.probedAudioDurationSeconds,
+      probedAudioDurationSeconds:
+          probedAudioDurationSeconds ?? this.probedAudioDurationSeconds,
       tracks: tracks ?? this.tracks,
-      snippetDurationSeconds: snippetDurationSeconds ?? this.snippetDurationSeconds,
+      snippetDurationSeconds:
+          snippetDurationSeconds ?? this.snippetDurationSeconds,
       placement: placement ?? this.placement,
       style: style ?? this.style,
       visualizerColorHex: visualizerColorHex ?? this.visualizerColorHex,
@@ -255,7 +271,8 @@ class DraftSettings {
       trimDurationSeconds: trimDurationSeconds ?? this.trimDurationSeconds,
       selectedPresetIds: selectedPresetIds ?? this.selectedPresetIds,
       outputDirectory: outputDirectory ?? this.outputDirectory,
-      useHardwareAcceleration: useHardwareAcceleration ?? this.useHardwareAcceleration,
+      useHardwareAcceleration:
+          useHardwareAcceleration ?? this.useHardwareAcceleration,
       losslessAudio: losslessAudio ?? this.losslessAudio,
       vintageEffect: vintageEffect ?? this.vintageEffect,
     );
@@ -266,7 +283,8 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
   @override
   DraftSettings build() => const DraftSettings();
 
-  void setReleaseMode(ReleaseMode mode) => state = state.copyWith(releaseMode: mode);
+  void setReleaseMode(ReleaseMode mode) =>
+      state = state.copyWith(releaseMode: mode);
   void setImagePath(String path) => state = state.copyWith(imagePath: path);
 
   void setAudioPath(String path) {
@@ -281,30 +299,37 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
   Future<void> _probeAudioDuration(String path) async {
     try {
       final locator = FfmpegLocator();
-      final duration = await AudioProbeService(locator).probeDurationSeconds(path);
+      final duration = await AudioProbeService(
+        locator,
+      ).probeDurationSeconds(path);
       if (state.audioPath == path) {
         state = state.copyWith(probedAudioDurationSeconds: duration);
       }
     } catch (_) {}
   }
 
-  void setOutputDirectory(String path) => state = state.copyWith(outputDirectory: path);
-  void setSnippetDuration(double v) => state = state.copyWith(snippetDurationSeconds: v);
-  void setUseHardwareAcceleration(bool v) => state = state.copyWith(useHardwareAcceleration: v);
+  void setOutputDirectory(String path) =>
+      state = state.copyWith(outputDirectory: path);
+  void setSnippetDuration(double v) =>
+      state = state.copyWith(snippetDurationSeconds: v);
+  void setUseHardwareAcceleration(bool v) =>
+      state = state.copyWith(useHardwareAcceleration: v);
   void setLosslessAudio(bool v) => state = state.copyWith(losslessAudio: v);
   void setVintageEffect(bool v) => state = state.copyWith(vintageEffect: v);
 
   void addTracks(List<String> audioPaths) {
     final isMedley = state.releaseMode == ReleaseMode.medley;
-    state = state.copyWith(tracks: [
-      ...state.tracks,
-      for (final audioPath in audioPaths)
-        Track(
-          audioPath: audioPath,
-          fullDuration: !isMedley,
-          trimDurationSeconds: isMedley ? state.snippetDurationSeconds : null,
-        ),
-    ]);
+    state = state.copyWith(
+      tracks: [
+        ...state.tracks,
+        for (final audioPath in audioPaths)
+          Track(
+            audioPath: audioPath,
+            fullDuration: !isMedley,
+            trimDurationSeconds: isMedley ? state.snippetDurationSeconds : null,
+          ),
+      ],
+    );
   }
 
   void removeTrackAt(int index) {
@@ -317,24 +342,33 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
     next[index] = track;
     state = state.copyWith(tracks: next);
   }
-  void setPlacement(VisualizerPlacement v) => state = state.copyWith(placement: v);
+
+  void setPlacement(VisualizerPlacement v) =>
+      state = state.copyWith(placement: v);
   void setStyle(VisualizerStyle v) => state = state.copyWith(style: v);
   void setColor(String hex) => state = state.copyWith(visualizerColorHex: hex);
   void setBlurRadius(double v) => state = state.copyWith(blurRadius: v);
   void setShowCover(bool v) => state = state.copyWith(showCover: v);
-  void setCoverSizeFraction(double v) => state = state.copyWith(coverSizeFraction: v);
-  void setCoverTransform(ElementTransform v) => state = state.copyWith(coverTransform: v);
+  void setCoverSizeFraction(double v) =>
+      state = state.copyWith(coverSizeFraction: v);
+  void setCoverTransform(ElementTransform v) =>
+      state = state.copyWith(coverTransform: v);
   void setShowLogo(bool v) => state = state.copyWith(showLogo: v);
-  void setLogoImagePath(String? path) => state = state.copyWith(logoImagePath: path);
-  void setLogoTransform(ElementTransform v) => state = state.copyWith(logoTransform: v);
+  void setLogoImagePath(String? path) =>
+      state = state.copyWith(logoImagePath: path);
+  void setLogoTransform(ElementTransform v) =>
+      state = state.copyWith(logoTransform: v);
   void setShowText(bool v) => state = state.copyWith(showText: v);
   void setTextContent(String v) => state = state.copyWith(textContent: v);
-  void setTextTransform(ElementTransform v) => state = state.copyWith(textTransform: v);
+  void setTextTransform(ElementTransform v) =>
+      state = state.copyWith(textTransform: v);
   void setShowQrCode(bool v) => state = state.copyWith(showQrCode: v);
   void setQrCodeContent(String v) => state = state.copyWith(qrCodeContent: v);
   void setQrCaptionText(String v) => state = state.copyWith(qrCaptionText: v);
-  void setQrCaptionPosition(QrCaptionPosition v) => state = state.copyWith(qrCaptionPosition: v);
-  void setQrTransform(ElementTransform v) => state = state.copyWith(qrTransform: v);
+  void setQrCaptionPosition(QrCaptionPosition v) =>
+      state = state.copyWith(qrCaptionPosition: v);
+  void setQrTransform(ElementTransform v) =>
+      state = state.copyWith(qrTransform: v);
 
   void resetTransforms() {
     state = state.copyWith(
@@ -344,12 +378,15 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
       qrTransform: ElementTransform.bottomLeft,
     );
   }
+
   void setFadeInSeconds(double v) => state = state.copyWith(fadeInSeconds: v);
   void setFadeOutSeconds(double v) => state = state.copyWith(fadeOutSeconds: v);
-  void setVisualizerSmoothness(double v) => state = state.copyWith(visualizerSmoothness: v);
+  void setVisualizerSmoothness(double v) =>
+      state = state.copyWith(visualizerSmoothness: v);
   void setFullDuration(bool v) => state = state.copyWith(fullDuration: v);
   void setTrimStart(double v) => state = state.copyWith(trimStartSeconds: v);
-  void setTrimDuration(double? v) => state = state.copyWith(trimDurationSeconds: v);
+  void setTrimDuration(double? v) =>
+      state = state.copyWith(trimDurationSeconds: v);
 
   void togglePreset(String presetId, bool selected) {
     final next = {...state.selectedPresetIds};
@@ -360,11 +397,111 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
     }
     state = state.copyWith(selectedPresetIds: next);
   }
+
+  /// Snapshots everything about how the video looks and behaves - but not
+  /// the actual cover image(s)/song(s)/output directory - so it can be
+  /// reapplied to a different release later.
+  RenderTemplate captureTemplate(String name) {
+    return RenderTemplate(
+      name: name,
+      releaseMode: state.releaseMode,
+      placement: state.placement,
+      style: state.style,
+      visualizerColorHex: state.visualizerColorHex,
+      blurRadius: state.blurRadius,
+      visualizerSmoothness: state.visualizerSmoothness,
+      showCover: state.showCover,
+      coverSizeFraction: state.coverSizeFraction,
+      coverTransform: state.coverTransform,
+      showLogo: state.showLogo,
+      logoImagePath: state.logoImagePath,
+      logoTransform: state.logoTransform,
+      showText: state.showText,
+      textContent: state.textContent,
+      textTransform: state.textTransform,
+      showQrCode: state.showQrCode,
+      qrCodeContent: state.qrCodeContent,
+      qrCaptionText: state.qrCaptionText,
+      qrCaptionPosition: state.qrCaptionPosition,
+      qrTransform: state.qrTransform,
+      fadeInSeconds: state.fadeInSeconds,
+      fadeOutSeconds: state.fadeOutSeconds,
+      fullDuration: state.fullDuration,
+      vintageEffect: state.vintageEffect,
+      selectedPresetIds: state.selectedPresetIds,
+      useHardwareAcceleration: state.useHardwareAcceleration,
+      losslessAudio: state.losslessAudio,
+    );
+  }
+
+  /// Applies a saved template's style on top of the current draft, leaving
+  /// the cover image(s)/song(s)/output directory untouched - the whole point
+  /// is reusing a look with different input files.
+  void applyTemplate(RenderTemplate template) {
+    state = state.copyWith(
+      releaseMode: template.releaseMode,
+      placement: template.placement,
+      style: template.style,
+      visualizerColorHex: template.visualizerColorHex,
+      blurRadius: template.blurRadius,
+      visualizerSmoothness: template.visualizerSmoothness,
+      showCover: template.showCover,
+      coverSizeFraction: template.coverSizeFraction,
+      coverTransform: template.coverTransform,
+      showLogo: template.showLogo,
+      logoImagePath: template.logoImagePath,
+      logoTransform: template.logoTransform,
+      showText: template.showText,
+      textContent: template.textContent,
+      textTransform: template.textTransform,
+      showQrCode: template.showQrCode,
+      qrCodeContent: template.qrCodeContent,
+      qrCaptionText: template.qrCaptionText,
+      qrCaptionPosition: template.qrCaptionPosition,
+      qrTransform: template.qrTransform,
+      fadeInSeconds: template.fadeInSeconds,
+      fadeOutSeconds: template.fadeOutSeconds,
+      fullDuration: template.fullDuration,
+      vintageEffect: template.vintageEffect,
+      selectedPresetIds: template.selectedPresetIds,
+      useHardwareAcceleration: template.useHardwareAcceleration,
+      losslessAudio: template.losslessAudio,
+    );
+  }
 }
 
-final draftSettingsProvider = NotifierProvider<DraftSettingsNotifier, DraftSettings>(
-  DraftSettingsNotifier.new,
-);
+final draftSettingsProvider =
+    NotifierProvider<DraftSettingsNotifier, DraftSettings>(
+      DraftSettingsNotifier.new,
+    );
+
+class TemplatesNotifier extends Notifier<List<RenderTemplate>> {
+  late final TemplateStoreService _store;
+
+  @override
+  List<RenderTemplate> build() {
+    _store = TemplateStoreService();
+    _load();
+    return [];
+  }
+
+  Future<void> _load() async {
+    state = await _store.loadAll();
+  }
+
+  Future<void> save(RenderTemplate template) async {
+    state = await _store.save(template);
+  }
+
+  Future<void> delete(String name) async {
+    state = await _store.delete(name);
+  }
+}
+
+final templatesProvider =
+    NotifierProvider<TemplatesNotifier, List<RenderTemplate>>(
+      TemplatesNotifier.new,
+    );
 
 class RenderJobNotifier extends Notifier<RenderProgress> {
   late final FfmpegLocator _locator;
@@ -377,10 +514,16 @@ class RenderJobNotifier extends Notifier<RenderProgress> {
   @override
   RenderProgress build() {
     _locator = FfmpegLocator();
-    _videoRenderService = VideoRenderService(locator: _locator, audioProbe: AudioProbeService(_locator));
+    _videoRenderService = VideoRenderService(
+      locator: _locator,
+      audioProbe: AudioProbeService(_locator),
+    );
     _batchRenderService = BatchRenderService(_videoRenderService);
     _multiSongBatchService = MultiSongBatchService(_videoRenderService);
-    _medleyRenderService = MedleyRenderService(_videoRenderService, ConcatService(_locator));
+    _medleyRenderService = MedleyRenderService(
+      _videoRenderService,
+      ConcatService(_locator),
+    );
     _qrCodeService = QrCodeService();
     return const RenderProgress();
   }
@@ -390,7 +533,8 @@ class RenderJobNotifier extends Notifier<RenderProgress> {
     if (!draft.isReadyToRender) {
       state = state.copyWith(
         phase: RenderPhase.error,
-        message: 'Select a cover image, the required song(s), and at least one platform first.',
+        message:
+            'Select a cover image, the required song(s), and at least one platform first.',
       );
       return;
     }
@@ -412,7 +556,11 @@ class RenderJobNotifier extends Notifier<RenderProgress> {
       );
     }
 
-    state = state.copyWith(phase: RenderPhase.rendering, presetCount: presets.length, presetIndex: 0);
+    state = state.copyWith(
+      phase: RenderPhase.rendering,
+      presetCount: presets.length,
+      presetIndex: 0,
+    );
 
     switch (draft.releaseMode) {
       case ReleaseMode.single:
@@ -455,10 +603,16 @@ class RenderJobNotifier extends Notifier<RenderProgress> {
     if (failed.isNotEmpty) {
       state = state.copyWith(
         phase: RenderPhase.error,
-        message: failed.map((f) => '${f.preset.name}: ${f.result.errorMessage}').join('\n'),
+        message: failed
+            .map((f) => '${f.preset.name}: ${f.result.errorMessage}')
+            .join('\n'),
       );
     } else {
-      state = state.copyWith(phase: RenderPhase.done, outputPath: outputDir, percent: 1.0);
+      state = state.copyWith(
+        phase: RenderPhase.done,
+        outputPath: outputDir,
+        percent: 1.0,
+      );
     }
   }
 
@@ -472,7 +626,7 @@ class RenderJobNotifier extends Notifier<RenderProgress> {
     final outcomes = await _multiSongBatchService.renderAll(
       templateSettings: template,
       tracks: draft.tracks,
-      defaultImagePath: draft.imagePath!,
+      defaultImagePath: draft.imagePath ?? '',
       presets: presets,
       outputDirectory: outputDir,
       qrAssetPath: qrAssetPath,
@@ -495,10 +649,19 @@ class RenderJobNotifier extends Notifier<RenderProgress> {
     if (failed.isNotEmpty) {
       state = state.copyWith(
         phase: RenderPhase.error,
-        message: failed.map((f) => '${f.track.audioPath} / ${f.preset.name}: ${f.result.errorMessage}').join('\n'),
+        message: failed
+            .map(
+              (f) =>
+                  '${f.track.audioPath} / ${f.preset.name}: ${f.result.errorMessage}',
+            )
+            .join('\n'),
       );
     } else {
-      state = state.copyWith(phase: RenderPhase.done, outputPath: outputDir, percent: 1.0);
+      state = state.copyWith(
+        phase: RenderPhase.done,
+        outputPath: outputDir,
+        percent: 1.0,
+      );
     }
   }
 
@@ -512,7 +675,7 @@ class RenderJobNotifier extends Notifier<RenderProgress> {
     final outcomes = await _medleyRenderService.renderMedley(
       templateSettings: template,
       tracks: draft.tracks,
-      defaultImagePath: draft.imagePath!,
+      defaultImagePath: draft.imagePath ?? '',
       presets: presets,
       outputDirectory: outputDir,
       qrAssetPath: qrAssetPath,
@@ -535,10 +698,16 @@ class RenderJobNotifier extends Notifier<RenderProgress> {
     if (failed.isNotEmpty) {
       state = state.copyWith(
         phase: RenderPhase.error,
-        message: failed.map((f) => '${f.preset.name}: ${f.result.errorMessage}').join('\n'),
+        message: failed
+            .map((f) => '${f.preset.name}: ${f.result.errorMessage}')
+            .join('\n'),
       );
     } else {
-      state = state.copyWith(phase: RenderPhase.done, outputPath: outputDir, percent: 1.0);
+      state = state.copyWith(
+        phase: RenderPhase.done,
+        outputPath: outputDir,
+        percent: 1.0,
+      );
     }
   }
 
@@ -557,12 +726,16 @@ class RenderJobNotifier extends Notifier<RenderProgress> {
     }
     return outDir.path;
   }
-
 }
 
-final renderJobProvider = NotifierProvider<RenderJobNotifier, RenderProgress>(RenderJobNotifier.new);
+final renderJobProvider = NotifierProvider<RenderJobNotifier, RenderProgress>(
+  RenderJobNotifier.new,
+);
 
 final previewServiceProvider = Provider<PreviewService>((ref) {
   final locator = FfmpegLocator();
-  return PreviewService(locator: locator, audioProbe: AudioProbeService(locator));
+  return PreviewService(
+    locator: locator,
+    audioProbe: AudioProbeService(locator),
+  );
 });

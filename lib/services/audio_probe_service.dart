@@ -11,9 +11,12 @@ class AudioProbeService {
   Future<double> probeDurationSeconds(String audioPath) async {
     final paths = await locator.resolve();
     final result = await Process.run(paths.ffprobe, [
-      '-v', 'error',
-      '-show_entries', 'format=duration',
-      '-of', 'csv=p=0',
+      '-v',
+      'error',
+      '-show_entries',
+      'format=duration',
+      '-of',
+      'csv=p=0',
       audioPath,
     ]);
     if (result.exitCode != 0) {

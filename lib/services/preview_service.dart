@@ -12,7 +12,11 @@ class PreviewResult {
   final bool success;
   final String? imagePath;
   final String? errorMessage;
-  const PreviewResult({required this.success, this.imagePath, this.errorMessage});
+  const PreviewResult({
+    required this.success,
+    this.imagePath,
+    this.errorMessage,
+  });
 }
 
 /// Renders a single still frame from the actual filter graph, so what the
@@ -38,10 +42,16 @@ class PreviewService {
     double? seekSeconds,
   }) async {
     if (!await File(settings.imagePath).exists()) {
-      return PreviewResult(success: false, errorMessage: 'Cover image not found: ${settings.imagePath}');
+      return PreviewResult(
+        success: false,
+        errorMessage: 'Cover image not found: ${settings.imagePath}',
+      );
     }
     if (!await File(settings.audioPath).exists()) {
-      return PreviewResult(success: false, errorMessage: 'Audio file not found: ${settings.audioPath}');
+      return PreviewResult(
+        success: false,
+        errorMessage: 'Audio file not found: ${settings.audioPath}',
+      );
     }
 
     final FfmpegPaths paths;
@@ -55,7 +65,10 @@ class PreviewService {
     try {
       audioDuration = await audioProbe.probeDurationSeconds(settings.audioPath);
     } catch (e) {
-      return PreviewResult(success: false, errorMessage: 'Failed to probe audio: $e');
+      return PreviewResult(
+        success: false,
+        errorMessage: 'Failed to probe audio: $e',
+      );
     }
 
     final outputPath = p.join(
@@ -73,7 +86,10 @@ class PreviewService {
       seekSeconds: seekSeconds,
     );
 
-    final result = await FfmpegProcessRunner().run(ffmpegPath: paths.ffmpeg, args: args);
+    final result = await FfmpegProcessRunner().run(
+      ffmpegPath: paths.ffmpeg,
+      args: args,
+    );
     if (!result.success) {
       return PreviewResult(success: false, errorMessage: result.stderrLog);
     }

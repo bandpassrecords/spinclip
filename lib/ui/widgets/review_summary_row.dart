@@ -11,7 +11,12 @@ class ReviewSummaryRow extends StatelessWidget {
   final String value;
   final VoidCallback onEdit;
 
-  const ReviewSummaryRow({super.key, required this.label, required this.value, required this.onEdit});
+  const ReviewSummaryRow({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.onEdit,
+  });
 
   @override
   Widget build(BuildContext context) {

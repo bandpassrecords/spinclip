@@ -52,12 +52,18 @@ class MultiSongBatchService {
 
     for (var ti = 0; ti < tracks.length; ti++) {
       final track = tracks[ti];
-      final trackSettings = templateSettings.forTrack(track, defaultImagePath: defaultImagePath);
+      final trackSettings = templateSettings.forTrack(
+        track,
+        defaultImagePath: defaultImagePath,
+      );
       final baseName = p.basenameWithoutExtension(track.audioPath);
 
       for (var pi = 0; pi < presets.length; pi++) {
         final preset = presets[pi];
-        final outputPath = p.join(outputDirectory, 'output_${preset.id}_$baseName.mp4');
+        final outputPath = p.join(
+          outputDirectory,
+          'output_${preset.id}_$baseName.mp4',
+        );
 
         final result = await videoRenderService.render(
           settings: trackSettings,
@@ -66,15 +72,17 @@ class MultiSongBatchService {
           qrAssetPath: qrAssetPath,
           useHardwareAcceleration: useHardwareAcceleration,
           onProgress: (percent) {
-            onProgress?.call(MultiSongProgress(
-              trackIndex: ti,
-              trackCount: tracks.length,
-              presetIndex: pi,
-              presetCount: presets.length,
-              currentTrack: track,
-              currentPreset: preset,
-              percentWithinJob: percent,
-            ));
+            onProgress?.call(
+              MultiSongProgress(
+                trackIndex: ti,
+                trackCount: tracks.length,
+                presetIndex: pi,
+                presetCount: presets.length,
+                currentTrack: track,
+                currentPreset: preset,
+                percentWithinJob: percent,
+              ),
+            );
           },
         );
 

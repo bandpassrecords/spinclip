@@ -57,7 +57,8 @@ class _VisualizerColorPickerState extends State<VisualizerColorPicker> {
     return Color(int.parse('FF$clean', radix: 16));
   }
 
-  bool _isSelected(String hex) => widget.colorHex.toUpperCase() == hex.toUpperCase();
+  bool _isSelected(String hex) =>
+      widget.colorHex.toUpperCase() == hex.toUpperCase();
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +66,10 @@ class _VisualizerColorPickerState extends State<VisualizerColorPicker> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.visualizerColorLabel, style: Theme.of(context).textTheme.bodyMedium),
+        Text(
+          l10n.visualizerColorLabel,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -73,7 +77,11 @@ class _VisualizerColorPickerState extends State<VisualizerColorPicker> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             for (final hex in _swatches)
-              _ColorSwatch(color: _parseColor(hex), selected: _isSelected(hex), onTap: () => widget.onColorChanged(hex)),
+              _ColorSwatch(
+                color: _parseColor(hex),
+                selected: _isSelected(hex),
+                onTap: () => widget.onColorChanged(hex),
+              ),
             ActionChip(
               avatar: _extracting
                   ? const SizedBox(
@@ -82,8 +90,12 @@ class _VisualizerColorPickerState extends State<VisualizerColorPicker> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.auto_awesome, size: 16),
-              label: Text(_extracting ? l10n.extractingColor : l10n.colorThemeAuto),
-              onPressed: widget.coverImagePath == null || _extracting ? null : _applyAutoTheme,
+              label: Text(
+                _extracting ? l10n.extractingColor : l10n.colorThemeAuto,
+              ),
+              onPressed: widget.coverImagePath == null || _extracting
+                  ? null
+                  : _applyAutoTheme,
             ),
             ActionChip(
               avatar: const Icon(Icons.nightlight_round, size: 16),
@@ -107,7 +119,11 @@ class _ColorSwatch extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _ColorSwatch({required this.color, required this.selected, required this.onTap});
+  const _ColorSwatch({
+    required this.color,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +136,10 @@ class _ColorSwatch extends StatelessWidget {
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
-          border: Border.all(color: selected ? Colors.white : Colors.black26, width: selected ? 2.5 : 1),
+          border: Border.all(
+            color: selected ? Colors.white : Colors.black26,
+            width: selected ? 2.5 : 1,
+          ),
         ),
       ),
     );

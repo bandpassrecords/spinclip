@@ -15,7 +15,11 @@ class RenderJobResult {
   final bool success;
   final String? outputPath;
   final String? errorMessage;
-  const RenderJobResult({required this.success, this.outputPath, this.errorMessage});
+  const RenderJobResult({
+    required this.success,
+    this.outputPath,
+    this.errorMessage,
+  });
 }
 
 /// Orchestrates a single render job: validate inputs, probe audio duration,
@@ -34,8 +38,8 @@ class VideoRenderService {
     this.builder = const FiltergraphBuilder(),
     FfmpegProcessRunner? runner,
     EncoderDetector? encoderDetector,
-  })  : runner = runner ?? FfmpegProcessRunner(),
-        encoderDetector = encoderDetector ?? EncoderDetector(locator);
+  }) : runner = runner ?? FfmpegProcessRunner(),
+       encoderDetector = encoderDetector ?? EncoderDetector(locator);
 
   Future<RenderJobResult> render({
     required RenderSettings settings,
@@ -46,18 +50,29 @@ class VideoRenderService {
     void Function(double percent)? onProgress,
   }) async {
     if (!await File(settings.imagePath).exists()) {
-      return RenderJobResult(success: false, errorMessage: 'Cover image not found: ${settings.imagePath}');
+      return RenderJobResult(
+        success: false,
+        errorMessage: 'Cover image not found: ${settings.imagePath}',
+      );
     }
     if (!await File(settings.audioPath).exists()) {
-      return RenderJobResult(success: false, errorMessage: 'Audio file not found: ${settings.audioPath}');
+      return RenderJobResult(
+        success: false,
+        errorMessage: 'Audio file not found: ${settings.audioPath}',
+      );
     }
 
     // Spotify Canvas strictly requires an MP4/AAC file - override the
     // lossless-audio preference for that one preset's job only.
     final effectiveSettings =
-        preset.id == 'spotify_canvas' && settings.losslessAudio ? settings.copyWith(losslessAudio: false) : settings;
+        preset.id == 'spotify_canvas' && settings.losslessAudio
+        ? settings.copyWith(losslessAudio: false)
+        : settings;
     // PCM audio needs a .mov container; MP4 doesn't support it reliably.
-    final effectiveOutputPath = p.setExtension(outputPath, effectiveSettings.losslessAudio ? '.mov' : '.mp4');
+    final effectiveOutputPath = p.setExtension(
+      outputPath,
+      effectiveSettings.losslessAudio ? '.mov' : '.mp4',
+    );
 
     final FfmpegPaths paths;
     try {
@@ -68,22 +83,31 @@ class VideoRenderService {
 
     late final double audioDuration;
     try {
-      audioDuration = await audioProbe.probeDurationSeconds(effectiveSettings.audioPath);
+      audioDuration = await audioProbe.probeDurationSeconds(
+        effectiveSettings.audioPath,
+      );
     } catch (e) {
-      return RenderJobResult(success: false, errorMessage: 'Failed to probe audio: $e');
+      return RenderJobResult(
+        success: false,
+        errorMessage: 'Failed to probe audio: $e',
+      );
     }
 
-    final effectiveDuration = preset.fixedLoopSeconds ??
+    final effectiveDuration =
+        preset.fixedLoopSeconds ??
         (effectiveSettings.fullDuration
             ? audioDuration
-            : (effectiveSettings.trimDurationSeconds ?? (audioDuration - effectiveSettings.trimStartSeconds)));
+            : (effectiveSettings.trimDurationSeconds ??
+                  (audioDuration - effectiveSettings.trimStartSeconds)));
 
     final outputDir = Directory(File(effectiveOutputPath).parent.path);
     if (!await outputDir.exists()) {
       await outputDir.create(recursive: true);
     }
 
-    final videoCodec = await encoderDetector.resolveVideoCodec(preferHardware: useHardwareAcceleration);
+    final videoCodec = await encoderDetector.resolveVideoCodec(
+      preferHardware: useHardwareAcceleration,
+    );
 
     var result = await _runOnce(
       settings: effectiveSettings,

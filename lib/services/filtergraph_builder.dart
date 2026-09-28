@@ -21,16 +21,30 @@ class FiltergraphBuilder {
     double? fixedLoopSeconds,
     String videoCodec = 'libx264',
   }) {
-    final _Trim trim = _resolveTrim(settings, audioDurationSeconds, fixedLoopSeconds);
+    final _Trim trim = _resolveTrim(
+      settings,
+      audioDurationSeconds,
+      fixedLoopSeconds,
+    );
 
     final args = <String>['-y'];
 
     if (trim.applyTrim) {
-      args.addAll(['-ss', trim.start.toStringAsFixed(3), '-t', trim.duration.toStringAsFixed(3)]);
+      args.addAll([
+        '-ss',
+        trim.start.toStringAsFixed(3),
+        '-t',
+        trim.duration.toStringAsFixed(3),
+      ]);
     }
     args.addAll(['-i', settings.audioPath]); // input 0: audio
 
-    args.addAll(['-loop', '1', '-i', settings.imagePath]); // input 1: cover image
+    args.addAll([
+      '-loop',
+      '1',
+      '-i',
+      settings.imagePath,
+    ]); // input 1: cover image
 
     int nextIndex = 2;
     int? logoIndex;
@@ -53,7 +67,8 @@ class FiltergraphBuilder {
       outputDurationSeconds: trim.duration,
     );
 
-    final hasAudioFade = settings.fadeInSeconds > 0 || settings.fadeOutSeconds > 0;
+    final hasAudioFade =
+        settings.fadeInSeconds > 0 || settings.fadeOutSeconds > 0;
 
     args.addAll(['-filter_complex', filterComplex]);
     args.addAll(['-map', '[outv]', '-map', hasAudioFade ? '[outa]' : '0:a']);
@@ -86,11 +101,18 @@ class FiltergraphBuilder {
     String? qrAssetPath,
     double? seekSeconds,
   }) {
-    final seek = seekSeconds ?? (audioDurationSeconds * 0.25).clamp(0, audioDurationSeconds);
+    final seek =
+        seekSeconds ??
+        (audioDurationSeconds * 0.25).clamp(0, audioDurationSeconds);
 
     final args = <String>['-y', '-ss', seek.toStringAsFixed(3)];
     args.addAll(['-i', settings.audioPath]); // input 0: audio
-    args.addAll(['-loop', '1', '-i', settings.imagePath]); // input 1: cover image
+    args.addAll([
+      '-loop',
+      '1',
+      '-i',
+      settings.imagePath,
+    ]); // input 1: cover image
 
     int nextIndex = 2;
     int? logoIndex;
@@ -120,7 +142,11 @@ class FiltergraphBuilder {
     return args;
   }
 
-  _Trim _resolveTrim(RenderSettings settings, double audioDurationSeconds, double? fixedLoopSeconds) {
+  _Trim _resolveTrim(
+    RenderSettings settings,
+    double audioDurationSeconds,
+    double? fixedLoopSeconds,
+  ) {
     if (fixedLoopSeconds != null) {
       final start = settings.trimStartSeconds;
       return _Trim(applyTrim: true, start: start, duration: fixedLoopSeconds);
@@ -129,7 +155,8 @@ class FiltergraphBuilder {
       return _Trim(applyTrim: false, start: 0, duration: audioDurationSeconds);
     }
     final start = settings.trimStartSeconds;
-    final duration = settings.trimDurationSeconds ?? (audioDurationSeconds - start);
+    final duration =
+        settings.trimDurationSeconds ?? (audioDurationSeconds - start);
     return _Trim(applyTrim: true, start: start, duration: duration);
   }
 
@@ -158,7 +185,8 @@ class FiltergraphBuilder {
       // cover close to (or larger than) the target resolution would scale up
       // to fill the entire frame edge-to-edge, hiding the blur entirely.
       // Never upscale past the source's own resolution ('min(...,iw)').
-      final coverMaxSize = (width < height ? width : height) * settings.coverSizeFraction;
+      final coverMaxSize =
+          (width < height ? width : height) * settings.coverSizeFraction;
       base = _addPositionedOverlay(
         parts,
         base: base,
@@ -191,7 +219,13 @@ class FiltergraphBuilder {
       );
     }
 
-    base = _addVisualizerStage(parts, base: base, settings: settings, width: width, height: height);
+    base = _addVisualizerStage(
+      parts,
+      base: base,
+      settings: settings,
+      width: width,
+      height: height,
+    );
 
     if (settings.showText && settings.textContent.trim().isNotEmpty) {
       final text = _escapeDrawtext(settings.textContent);
@@ -215,10 +249,24 @@ class FiltergraphBuilder {
       base = label;
     }
 
-    final videoFade = _buildFadeFilter(settings.fadeInSeconds, settings.fadeOutSeconds, outputDurationSeconds, isAudio: false);
-    parts.add(videoFade != null ? "[$base]$videoFade,format=yuv420p[outv]" : "[$base]format=yuv420p[outv]");
+    final videoFade = _buildFadeFilter(
+      settings.fadeInSeconds,
+      settings.fadeOutSeconds,
+      outputDurationSeconds,
+      isAudio: false,
+    );
+    parts.add(
+      videoFade != null
+          ? "[$base]$videoFade,format=yuv420p[outv]"
+          : "[$base]format=yuv420p[outv]",
+    );
 
-    final audioFade = _buildFadeFilter(settings.fadeInSeconds, settings.fadeOutSeconds, outputDurationSeconds, isAudio: true);
+    final audioFade = _buildFadeFilter(
+      settings.fadeInSeconds,
+      settings.fadeOutSeconds,
+      outputDurationSeconds,
+      isAudio: true,
+    );
     if (audioFade != null) {
       parts.add("[0:a]$audioFade[outa]");
     }
@@ -245,7 +293,9 @@ class FiltergraphBuilder {
     if (transform.rotationDegrees != 0) {
       final rotated = nextLabel('rotated');
       final radians = transform.rotationDegrees * math.pi / 180.0;
-      parts.add("[$scaled]rotate=${_fmt(radians)}:c=none:ow=rotw:oh=roth[$rotated]");
+      parts.add(
+        "[$scaled]rotate=${_fmt(radians)}:c=none:ow=rotw:oh=roth[$rotated]",
+      );
       elementLabel = rotated;
     }
 
@@ -258,7 +308,12 @@ class FiltergraphBuilder {
 
   /// Builds a `fade`/`afade` filter chain (video/audio respectively) for the
   /// configured fade-in/fade-out durations, or null if neither is set.
-  String? _buildFadeFilter(double fadeIn, double fadeOut, double totalDuration, {required bool isAudio}) {
+  String? _buildFadeFilter(
+    double fadeIn,
+    double fadeOut,
+    double totalDuration, {
+    required bool isAudio,
+  }) {
     if (fadeIn <= 0 && fadeOut <= 0) return null;
     final filterName = isAudio ? 'afade' : 'fade';
     final stages = <String>[];
@@ -284,7 +339,8 @@ class FiltergraphBuilder {
     // 0.0-1.0 -> showfreqs' averaging frame count (2-16). Higher averages
     // more frames together, so bars rise/fall smoothly instead of jittering
     // frame to frame.
-    final averaging = (2 + settings.visualizerSmoothness.clamp(0, 1) * 14).round();
+    final averaging = (2 + settings.visualizerSmoothness.clamp(0, 1) * 14)
+        .round();
 
     String vizExpr(int vw, int vh) {
       switch (settings.style) {
@@ -301,7 +357,8 @@ class FiltergraphBuilder {
 
     // colorkey turns the visualizer filter's black canvas transparent so only
     // the drawn bars/wave/scope composite over the background+cover.
-    String rawVizFilter(int vw, int vh) => "[0:a]${vizExpr(vw, vh)},colorkey=0x000000:0.15:0.1";
+    String rawVizFilter(int vw, int vh) =>
+        "[0:a]${vizExpr(vw, vh)},colorkey=0x000000:0.15:0.1";
 
     switch (settings.placement) {
       case VisualizerPlacement.bottomBand:
@@ -379,12 +436,17 @@ class FiltergraphBuilder {
         .replaceAll('%', '\\%');
   }
 
-  String _fmt(double v) => v == v.roundToDouble() ? v.round().toString() : v.toString();
+  String _fmt(double v) =>
+      v == v.roundToDouble() ? v.round().toString() : v.toString();
 }
 
 class _Trim {
   final bool applyTrim;
   final double start;
   final double duration;
-  const _Trim({required this.applyTrim, required this.start, required this.duration});
+  const _Trim({
+    required this.applyTrim,
+    required this.start,
+    required this.duration,
+  });
 }

@@ -22,6 +22,7 @@ import '../widgets/position_canvas.dart';
 import '../widgets/preview_panel.dart';
 import '../widgets/render_progress_view.dart';
 import '../widgets/review_summary_row.dart';
+import '../widgets/template_controls.dart';
 import '../widgets/track_list_editor.dart';
 import '../widgets/visualizer_placement_picker.dart';
 import '../widgets/visualizer_style_picker.dart';
@@ -56,18 +57,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   /// A settings snapshot for the live preview: the actual RenderSettings
   /// that would produce this look, or null until enough is selected to
-  /// render one. In multi-song/medley mode, previews the first track.
+  /// render one. In multi-song/medley mode, previews the first track -
+  /// which may supply its own cover image instead of the shared default.
   RenderSettings? _previewSettings(DraftSettings draft) {
-    if (draft.imagePath == null) return null;
     if (draft.releaseMode == ReleaseMode.single) {
-      if (draft.audioPath == null) return null;
+      if (draft.imagePath == null || draft.audioPath == null) return null;
       return draft.toRenderSettings();
     }
     if (draft.tracks.isEmpty) return null;
+    final firstTrack = draft.tracks.first;
+    final effectiveImage = firstTrack.imagePath ?? draft.imagePath;
+    if (effectiveImage == null) return null;
     return draft.toTemplateSettings().forTrack(
-      draft.tracks.first,
-      defaultImagePath: draft.imagePath!,
+      firstTrack,
+      defaultImagePath: effectiveImage,
     );
+  }
+
+  /// Whether the Files step has everything it needs before the wizard lets
+  /// the user move on: a cover image and audio (single mode), or at least
+  /// the required number of tracks each with a resolvable cover - either its
+  /// own or the shared default (multi-song/medley mode).
+  bool _filesStepComplete(DraftSettings draft) {
+    switch (draft.releaseMode) {
+      case ReleaseMode.single:
+        return draft.imagePath != null && draft.audioPath != null;
+      case ReleaseMode.multiSong:
+        return draft.tracks.isNotEmpty &&
+            (draft.imagePath != null ||
+                draft.tracks.every((t) => t.imagePath != null));
+      case ReleaseMode.medley:
+        return draft.tracks.length >= 2 &&
+            (draft.imagePath != null ||
+                draft.tracks.every((t) => t.imagePath != null));
+    }
   }
 
   String _releaseModeSummary(AppLocalizations l10n, DraftSettings draft) {
@@ -142,6 +165,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final draftNotifier = ref.read(draftSettingsProvider.notifier);
     final progress = ref.watch(renderJobProvider);
     final renderNotifier = ref.read(renderJobProvider.notifier);
+    final templates = ref.watch(templatesProvider);
+    final templatesNotifier = ref.read(templatesProvider.notifier);
 
     final isRendering =
         progress.phase == RenderPhase.rendering ||
@@ -266,6 +291,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            TemplateControls(
+              templates: templates,
+              onApply: draftNotifier.applyTemplate,
+              onSaveAs: (name) =>
+                  templatesNotifier.save(draftNotifier.captureTemplate(name)),
+              onDelete: templatesNotifier.delete,
+            ),
+            const SizedBox(height: 16),
             CustomizationPanel(
               blurRadius: draft.blurRadius,
               onBlurChanged: draftNotifier.setBlurRadius,
@@ -543,6 +576,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Expanded(
                         child: PageView(
                           controller: _pageController,
+                          // Swiping would let the user skip past a step
+                          // whose required fields aren't filled in yet -
+                          // Back/Next (and the review summary's edit links)
+                          // are the only way to move between pages.
+                          physics: const NeverScrollableScrollPhysics(),
                           onPageChanged: (i) =>
                               setState(() => _currentStep = i),
                           children: [
@@ -558,31 +596,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Row(
+                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            if (_currentStep > 0)
-                              OutlinedButton.icon(
-                                onPressed: () => _goTo(_currentStep - 1),
-                                icon: const Icon(Icons.arrow_back),
-                                label: Text(l10n.back),
+                            if (_currentStep == stepFilesIndex &&
+                                !_filesStepComplete(draft))
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Text(
+                                  l10n.filesStepRequiredHint,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.error,
+                                      ),
+                                ),
                               ),
-                            const Spacer(),
-                            if (_currentStep < lastStep)
-                              FilledButton.icon(
-                                onPressed: () => _goTo(_currentStep + 1),
-                                icon: const Icon(Icons.arrow_forward),
-                                label: Text(l10n.next),
-                              )
-                            else
-                              FilledButton.icon(
-                                onPressed:
-                                    (draft.isReadyToRender && !isRendering)
-                                    ? renderNotifier.startRender
-                                    : null,
-                                icon: const Icon(Icons.movie_creation_outlined),
-                                label: Text(l10n.renderButton),
-                              ),
+                            Row(
+                              children: [
+                                if (_currentStep > 0)
+                                  OutlinedButton.icon(
+                                    onPressed: () => _goTo(_currentStep - 1),
+                                    icon: const Icon(Icons.arrow_back),
+                                    label: Text(l10n.back),
+                                  ),
+                                const Spacer(),
+                                if (_currentStep < lastStep)
+                                  FilledButton.icon(
+                                    onPressed:
+                                        (_currentStep == stepFilesIndex &&
+                                            !_filesStepComplete(draft))
+                                        ? null
+                                        : () => _goTo(_currentStep + 1),
+                                    icon: const Icon(Icons.arrow_forward),
+                                    label: Text(l10n.next),
+                                  )
+                                else
+                                  FilledButton.icon(
+                                    onPressed:
+                                        (draft.isReadyToRender && !isRendering)
+                                        ? renderNotifier.startRender
+                                        : null,
+                                    icon: const Icon(
+                                      Icons.movie_creation_outlined,
+                                    ),
+                                    label: Text(l10n.renderButton),
+                                  ),
+                              ],
+                            ),
                           ],
                         ),
                       ),

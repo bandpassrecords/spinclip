@@ -7,7 +7,11 @@ class OutputDirectoryPicker extends StatelessWidget {
   final String? selectedPath;
   final ValueChanged<String> onDirectorySelected;
 
-  const OutputDirectoryPicker({super.key, required this.selectedPath, required this.onDirectorySelected});
+  const OutputDirectoryPicker({
+    super.key,
+    required this.selectedPath,
+    required this.onDirectorySelected,
+  });
 
   Future<void> _browse() async {
     final path = await FilePicker.getDirectoryPath();
@@ -30,7 +34,8 @@ class OutputDirectoryPicker extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                selectedPath ?? AppLocalizations.of(context)!.outputDirectoryDefault,
+                selectedPath ??
+                    AppLocalizations.of(context)!.outputDirectoryDefault,
                 overflow: TextOverflow.ellipsis,
               ),
             ),

@@ -7,7 +7,11 @@ class VisualizerStylePicker extends StatelessWidget {
   final VisualizerStyle value;
   final ValueChanged<VisualizerStyle> onChanged;
 
-  const VisualizerStylePicker({super.key, required this.value, required this.onChanged});
+  const VisualizerStylePicker({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {

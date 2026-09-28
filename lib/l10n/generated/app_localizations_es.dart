@@ -347,4 +347,35 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get vintageEffectSubtitle =>
       'Envejecimiento leve: tono cálido, viñeta suave, grano de película ligero.';
+
+  @override
+  String get filesStepRequiredHint =>
+      'Se requiere una imagen de portada y audio para continuar.';
+
+  @override
+  String get trackDefaultCoverHint => 'Usa la portada predeterminada';
+
+  @override
+  String get trackSetCover => 'Definir portada';
+
+  @override
+  String get trackClearCoverTooltip => 'Quitar portada personalizada';
+
+  @override
+  String get loadTemplateButton => 'Cargar plantilla';
+
+  @override
+  String get saveAsTemplateButton => 'Guardar como plantilla';
+
+  @override
+  String get templateNameLabel => 'Nombre de la plantilla';
+
+  @override
+  String get noTemplatesSaved => 'Aún no hay plantillas guardadas';
+
+  @override
+  String get deleteTemplateTooltip => 'Eliminar plantilla';
+
+  @override
+  String get save => 'Guardar';
 }

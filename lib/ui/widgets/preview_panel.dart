@@ -18,7 +18,12 @@ class PreviewPanel extends ConsumerStatefulWidget {
   final int width;
   final int height;
 
-  const PreviewPanel({super.key, required this.settings, required this.width, required this.height});
+  const PreviewPanel({
+    super.key,
+    required this.settings,
+    required this.width,
+    required this.height,
+  });
 
   @override
   ConsumerState<PreviewPanel> createState() => _PreviewPanelState();
@@ -46,7 +51,9 @@ class _PreviewPanelState extends ConsumerState<PreviewPanel> {
   void didUpdateWidget(covariant PreviewPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     final changed =
-        widget.settings != oldWidget.settings || widget.width != oldWidget.width || widget.height != oldWidget.height;
+        widget.settings != oldWidget.settings ||
+        widget.width != oldWidget.width ||
+        widget.height != oldWidget.height;
     if (!changed) return;
 
     _debounce?.cancel();
@@ -120,11 +127,21 @@ class _PreviewPanelState extends ConsumerState<PreviewPanel> {
       }
     });
 
-    if (result.success && previousImagePath != null && previousImagePath != result.imagePath) {
-      unawaited(File(previousImagePath).delete().catchError((_) => File(previousImagePath)));
+    if (result.success &&
+        previousImagePath != null &&
+        previousImagePath != result.imagePath) {
+      unawaited(
+        File(
+          previousImagePath,
+        ).delete().catchError((_) => File(previousImagePath)),
+      );
     }
     if (previousQrAssetPath != null && previousQrAssetPath != qrAssetPath) {
-      unawaited(File(previousQrAssetPath).delete().catchError((_) => File(previousQrAssetPath)));
+      unawaited(
+        File(
+          previousQrAssetPath,
+        ).delete().catchError((_) => File(previousQrAssetPath)),
+      );
     }
 
     if (_regenerateAgainAfterCurrent) {
@@ -157,14 +174,20 @@ class _PreviewPanelState extends ConsumerState<PreviewPanel> {
                     // A fresh file is written per generation, so bypass
                     // Flutter's image cache or a re-preview would show the
                     // previous frame under the same-looking widget.
-                    child: Image.file(File(_imagePath!), key: ValueKey(_imagePath), fit: BoxFit.contain),
+                    child: Image.file(
+                      File(_imagePath!),
+                      key: ValueKey(_imagePath),
+                      fit: BoxFit.contain,
+                    ),
                   )
                 else
                   Center(
                     child: Text(
                       ready
                           ? AppLocalizations.of(context)!.renderingPreview
-                          : AppLocalizations.of(context)!.selectCoverAndAudioFirst,
+                          : AppLocalizations.of(
+                              context,
+                            )!.selectCoverAndAudioFirst,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),

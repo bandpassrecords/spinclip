@@ -50,12 +50,14 @@ class BatchRenderService {
         qrAssetPath: qrAssetPath,
         useHardwareAcceleration: useHardwareAcceleration,
         onProgress: (percent) {
-          onProgress?.call(BatchProgress(
-            presetIndex: i,
-            presetCount: presets.length,
-            currentPreset: preset,
-            percentWithinPreset: percent,
-          ));
+          onProgress?.call(
+            BatchProgress(
+              presetIndex: i,
+              presetCount: presets.length,
+              currentPreset: preset,
+              percentWithinPreset: percent,
+            ),
+          );
         },
       );
 

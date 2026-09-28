@@ -54,7 +54,9 @@ class _FileDropTargetState extends State<FileDropTarget> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             border: Border.all(
-              color: _dragging ? Theme.of(context).colorScheme.primary : Colors.grey,
+              color: _dragging
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.grey,
               width: _dragging ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(8),
@@ -65,7 +67,11 @@ class _FileDropTargetState extends State<FileDropTarget> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  hasFile ? widget.selectedPath! : AppLocalizations.of(context)!.dropFileHint(widget.label),
+                  hasFile
+                      ? widget.selectedPath!
+                      : AppLocalizations.of(
+                          context,
+                        )!.dropFileHint(widget.label),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

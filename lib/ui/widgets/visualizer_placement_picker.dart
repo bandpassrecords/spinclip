@@ -7,7 +7,11 @@ class VisualizerPlacementPicker extends StatelessWidget {
   final VisualizerPlacement value;
   final ValueChanged<VisualizerPlacement> onChanged;
 
-  const VisualizerPlacementPicker({super.key, required this.value, required this.onChanged});
+  const VisualizerPlacementPicker({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {

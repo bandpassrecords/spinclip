@@ -9,7 +9,11 @@ class RenderProgressView extends StatelessWidget {
   final VoidCallback onCancel;
   final _folderLauncher = FolderLauncher();
 
-  RenderProgressView({super.key, required this.progress, required this.onCancel});
+  RenderProgressView({
+    super.key,
+    required this.progress,
+    required this.onCancel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +51,15 @@ class RenderProgressView extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.renderDone(progress.outputPath ?? ''), style: const TextStyle(color: Colors.greenAccent)),
+            Text(
+              l10n.renderDone(progress.outputPath ?? ''),
+              style: const TextStyle(color: Colors.greenAccent),
+            ),
             if (progress.outputPath != null) ...[
               const SizedBox(height: 8),
               OutlinedButton.icon(
-                onPressed: () => _folderLauncher.openFolder(progress.outputPath!),
+                onPressed: () =>
+                    _folderLauncher.openFolder(progress.outputPath!),
                 icon: const Icon(Icons.folder_open),
                 label: Text(l10n.openOutputFolder),
               ),
@@ -59,7 +67,10 @@ class RenderProgressView extends StatelessWidget {
           ],
         );
       case RenderPhase.error:
-        return Text(l10n.renderError(progress.message ?? ''), style: const TextStyle(color: Colors.redAccent));
+        return Text(
+          l10n.renderError(progress.message ?? ''),
+          style: const TextStyle(color: Colors.redAccent),
+        );
       case RenderPhase.cancelled:
         return Text(l10n.renderCancelled);
     }

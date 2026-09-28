@@ -346,4 +346,35 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get vintageEffectSubtitle =>
       'Envelhecimento leve: tom quente, vinheta suave, granulado de filme leve.';
+
+  @override
+  String get filesStepRequiredHint =>
+      'É necessário selecionar uma imagem de capa e um áudio para continuar.';
+
+  @override
+  String get trackDefaultCoverHint => 'Usa a capa padrão';
+
+  @override
+  String get trackSetCover => 'Definir capa';
+
+  @override
+  String get trackClearCoverTooltip => 'Remover capa personalizada';
+
+  @override
+  String get loadTemplateButton => 'Carregar modelo';
+
+  @override
+  String get saveAsTemplateButton => 'Salvar como modelo';
+
+  @override
+  String get templateNameLabel => 'Nome do modelo';
+
+  @override
+  String get noTemplatesSaved => 'Nenhum modelo salvo ainda';
+
+  @override
+  String get deleteTemplateTooltip => 'Excluir modelo';
+
+  @override
+  String get save => 'Salvar';
 }

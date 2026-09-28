@@ -10,7 +10,11 @@ class SpinclipApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Spinclip',
-      theme: ThemeData(colorSchemeSeed: const Color(0xFF33CCFF), useMaterial3: true, brightness: Brightness.dark),
+      theme: ThemeData(
+        colorSchemeSeed: const Color(0xFF33CCFF),
+        useMaterial3: true,
+        brightness: Brightness.dark,
+      ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const HomeScreen(),

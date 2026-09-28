@@ -22,7 +22,10 @@ class QrCodeService {
     String captionText = '',
     QrCaptionPosition captionPosition = QrCaptionPosition.below,
   }) async {
-    final qrCode = QrCode(payload: QrPayload.fromString(content), errorCorrectLevel: QrErrorCorrectLevel.medium);
+    final qrCode = QrCode(
+      payload: QrPayload.fromString(content),
+      errorCorrectLevel: QrErrorCorrectLevel.medium,
+    );
     final qrImage = QrImage(qrCode);
     final moduleCount = qrImage.moduleCount;
 
@@ -33,9 +36,15 @@ class QrCodeService {
 
     final hasCaption = captionText.trim().isNotEmpty;
     final captionAreaHeight = hasCaption ? (qrSize * 0.16).round() : 0;
-    final qrTop = hasCaption && captionPosition == QrCaptionPosition.above ? captionAreaHeight : 0;
+    final qrTop = hasCaption && captionPosition == QrCaptionPosition.above
+        ? captionAreaHeight
+        : 0;
 
-    final canvas = img.Image(width: qrSize, height: qrSize + captionAreaHeight, numChannels: 3);
+    final canvas = img.Image(
+      width: qrSize,
+      height: qrSize + captionAreaHeight,
+      numChannels: 3,
+    );
     img.fill(canvas, color: img.ColorRgb8(255, 255, 255));
 
     for (var row = 0; row < moduleCount; row++) {
@@ -57,10 +66,19 @@ class QrCodeService {
     if (hasCaption) {
       final font = qrSize > 700 ? img.arial48 : img.arial24;
       final text = captionText.trim();
-      final captionTop = captionPosition == QrCaptionPosition.above ? 0 : qrSize;
+      final captionTop = captionPosition == QrCaptionPosition.above
+          ? 0
+          : qrSize;
       // x omitted -> drawString centers the text horizontally within the canvas.
-      final y = captionTop + ((captionAreaHeight - font.lineHeight) / 2).round();
-      img.drawString(canvas, text, font: font, y: y, color: img.ColorRgb8(0, 0, 0));
+      final y =
+          captionTop + ((captionAreaHeight - font.lineHeight) / 2).round();
+      img.drawString(
+        canvas,
+        text,
+        font: font,
+        y: y,
+        color: img.ColorRgb8(0, 0, 0),
+      );
     }
 
     final outputPath = p.join(

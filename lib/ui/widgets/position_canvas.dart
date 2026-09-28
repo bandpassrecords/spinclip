@@ -60,7 +60,10 @@ class _PositionCanvasState extends State<PositionCanvas> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.positionCanvasHint, style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          l10n.positionCanvasHint,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
         const SizedBox(height: 8),
         AspectRatio(
           aspectRatio: widget.frameWidth / widget.frameHeight,
@@ -84,16 +87,28 @@ class _PositionCanvasState extends State<PositionCanvas> {
                         child: GestureDetector(
                           onTap: () => setState(() => _selectedId = item.id),
                           onPanUpdate: (details) {
-                            final newDx = ((item.transform.dx * boxWidth) + details.delta.dx) / boxWidth;
-                            final newDy = ((item.transform.dy * boxHeight) + details.delta.dy) / boxHeight;
+                            final newDx =
+                                ((item.transform.dx * boxWidth) +
+                                    details.delta.dx) /
+                                boxWidth;
+                            final newDy =
+                                ((item.transform.dy * boxHeight) +
+                                    details.delta.dy) /
+                                boxHeight;
                             widget.onChanged(
                               item.id,
-                              item.transform.copyWith(dx: newDx.clamp(0.0, 1.0), dy: newDy.clamp(0.0, 1.0)),
+                              item.transform.copyWith(
+                                dx: newDx.clamp(0.0, 1.0),
+                                dy: newDy.clamp(0.0, 1.0),
+                              ),
                             );
                             setState(() => _selectedId = item.id);
                           },
                           child: Transform.rotate(
-                            angle: item.transform.rotationDegrees * 3.14159265358979 / 180.0,
+                            angle:
+                                item.transform.rotationDegrees *
+                                3.14159265358979 /
+                                180.0,
                             child: Container(
                               width: _handleSize,
                               height: _handleSize,
@@ -101,11 +116,17 @@ class _PositionCanvasState extends State<PositionCanvas> {
                                 color: item.color,
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: item.id == _selectedId ? Colors.white : Colors.black45,
+                                  color: item.id == _selectedId
+                                      ? Colors.white
+                                      : Colors.black45,
                                   width: item.id == _selectedId ? 2.5 : 1,
                                 ),
                               ),
-                              child: Icon(item.icon, size: 18, color: Colors.white),
+                              child: Icon(
+                                item.icon,
+                                size: 18,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
@@ -118,14 +139,22 @@ class _PositionCanvasState extends State<PositionCanvas> {
         ),
         if (selectedItem != null && selectedItem.supportsRotation) ...[
           const SizedBox(height: 8),
-          Text(l10n.rotationLabel(selectedItem.label, selectedItem.transform.rotationDegrees.round())),
+          Text(
+            l10n.rotationLabel(
+              selectedItem.label,
+              selectedItem.transform.rotationDegrees.round(),
+            ),
+          ),
           Slider(
             value: selectedItem.transform.rotationDegrees,
             min: 0,
             max: 360,
             divisions: 72,
             label: '${selectedItem.transform.rotationDegrees.round()}°',
-            onChanged: (v) => widget.onChanged(selectedItem.id, selectedItem.transform.copyWith(rotationDegrees: v)),
+            onChanged: (v) => widget.onChanged(
+              selectedItem.id,
+              selectedItem.transform.copyWith(rotationDegrees: v),
+            ),
           ),
         ],
       ],

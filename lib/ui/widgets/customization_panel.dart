@@ -92,7 +92,9 @@ class CustomizationPanel extends StatelessWidget {
           label: blurRadius.round().toString(),
           onChanged: onBlurChanged,
         ),
-        Text(l10n.visualizerSmoothnessLabel((visualizerSmoothness * 100).round())),
+        Text(
+          l10n.visualizerSmoothnessLabel((visualizerSmoothness * 100).round()),
+        ),
         Slider(
           value: visualizerSmoothness,
           min: 0,
@@ -157,7 +159,9 @@ class CustomizationPanel extends StatelessWidget {
             child: TextField(
               decoration: InputDecoration(labelText: l10n.overlayText),
               controller: TextEditingController(text: textContent)
-                ..selection = TextSelection.collapsed(offset: textContent.length),
+                ..selection = TextSelection.collapsed(
+                  offset: textContent.length,
+                ),
               onChanged: onTextContentChanged,
             ),
           ),
@@ -173,7 +177,9 @@ class CustomizationPanel extends StatelessWidget {
             child: TextField(
               decoration: InputDecoration(labelText: l10n.qrCodeContentLabel),
               controller: TextEditingController(text: qrCodeContent)
-                ..selection = TextSelection.collapsed(offset: qrCodeContent.length),
+                ..selection = TextSelection.collapsed(
+                  offset: qrCodeContent.length,
+                ),
               onChanged: onQrCodeContentChanged,
             ),
           ),
@@ -182,7 +188,9 @@ class CustomizationPanel extends StatelessWidget {
             child: TextField(
               decoration: InputDecoration(labelText: l10n.qrCaptionLabel),
               controller: TextEditingController(text: qrCaptionText)
-                ..selection = TextSelection.collapsed(offset: qrCaptionText.length),
+                ..selection = TextSelection.collapsed(
+                  offset: qrCaptionText.length,
+                ),
               onChanged: onQrCaptionTextChanged,
             ),
           ),
@@ -191,7 +199,10 @@ class CustomizationPanel extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 12),
               child: SegmentedButton<QrCaptionPosition>(
                 segments: QrCaptionPosition.values
-                    .map((v) => ButtonSegment(value: v, label: Text(v.label(l10n))))
+                    .map(
+                      (v) =>
+                          ButtonSegment(value: v, label: Text(v.label(l10n))),
+                    )
                     .toList(),
                 selected: {qrCaptionPosition},
                 onSelectionChanged: (s) => onQrCaptionPositionChanged(s.first),

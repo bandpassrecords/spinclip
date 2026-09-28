@@ -33,12 +33,22 @@ class WaveformPainter extends CustomPainter {
 
     for (var i = 0; i < peaks.length; i++) {
       final fraction = i / peaks.length;
-      final inSelection = fraction >= selectionStartFraction && fraction <= selectionEndFraction;
+      final inSelection =
+          fraction >= selectionStartFraction &&
+          fraction <= selectionEndFraction;
       final paint = Paint()..color = inSelection ? barColor : dimmedBarColor;
-      final barHeight = (peaks[i] * size.height / 2).clamp(1.0, size.height / 2);
+      final barHeight = (peaks[i] * size.height / 2).clamp(
+        1.0,
+        size.height / 2,
+      );
       final x = i * barWidth;
       canvas.drawRect(
-        Rect.fromLTRB(x, midY - barHeight, x + barWidth * 0.8, midY + barHeight),
+        Rect.fromLTRB(
+          x,
+          midY - barHeight,
+          x + barWidth * 0.8,
+          midY + barHeight,
+        ),
         paint,
       );
     }
@@ -58,7 +68,13 @@ class WaveformPainter extends CustomPainter {
     final playhead = playheadFraction;
     if (playhead != null) {
       final x = playhead * size.width;
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), Paint()..color = playheadColor..strokeWidth = 2);
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        Paint()
+          ..color = playheadColor
+          ..strokeWidth = 2,
+      );
     }
   }
 

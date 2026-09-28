@@ -17,7 +17,12 @@ class PaletteExtractorService {
       final decoded = img.decodeImage(bytes);
       if (decoded == null) return fallbackHex;
 
-      final thumb = img.copyResize(decoded, width: 48, height: 48, maintainAspect: false);
+      final thumb = img.copyResize(
+        decoded,
+        width: 48,
+        height: 48,
+        maintainAspect: false,
+      );
 
       double weightSum = 0;
       double rSum = 0, gSum = 0, bSum = 0;
@@ -30,7 +35,9 @@ class PaletteExtractorService {
         final maxC = math.max(r, math.max(g, b));
         final minC = math.min(r, math.min(g, b));
         final lightness = (maxC + minC) / 2 / 255;
-        if (lightness < 0.10 || lightness > 0.92) continue; // skip near-black/near-white
+        if (lightness < 0.10 || lightness > 0.92) {
+          continue; // skip near-black/near-white
+        }
 
         final saturation = (maxC - minC) / 255;
         final weight = saturation * saturation; // favor vivid pixels strongly

@@ -344,4 +344,35 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vintageEffectSubtitle =>
       'Mild old-school aging: warm tone, soft vignette, light film grain.';
+
+  @override
+  String get filesStepRequiredHint =>
+      'A cover image and audio are required to continue.';
+
+  @override
+  String get trackDefaultCoverHint => 'Uses the default cover';
+
+  @override
+  String get trackSetCover => 'Set cover';
+
+  @override
+  String get trackClearCoverTooltip => 'Remove custom cover';
+
+  @override
+  String get loadTemplateButton => 'Load template';
+
+  @override
+  String get saveAsTemplateButton => 'Save as template';
+
+  @override
+  String get templateNameLabel => 'Template name';
+
+  @override
+  String get noTemplatesSaved => 'No saved templates yet';
+
+  @override
+  String get deleteTemplateTooltip => 'Delete template';
+
+  @override
+  String get save => 'Save';
 }

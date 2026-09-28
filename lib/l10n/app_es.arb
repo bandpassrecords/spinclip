@@ -114,5 +114,18 @@
   "colorThemeSparkling": "Chispeante",
   "extractingColor": "Extrayendo color...",
   "vintageEffectLabel": "Efecto vintage",
-  "vintageEffectSubtitle": "Envejecimiento leve: tono cálido, viñeta suave, grano de película ligero."
+  "vintageEffectSubtitle": "Envejecimiento leve: tono cálido, viñeta suave, grano de película ligero.",
+
+  "filesStepRequiredHint": "Se requiere una imagen de portada y audio para continuar.",
+
+  "trackDefaultCoverHint": "Usa la portada predeterminada",
+  "trackSetCover": "Definir portada",
+  "trackClearCoverTooltip": "Quitar portada personalizada",
+
+  "loadTemplateButton": "Cargar plantilla",
+  "saveAsTemplateButton": "Guardar como plantilla",
+  "templateNameLabel": "Nombre de la plantilla",
+  "noTemplatesSaved": "Aún no hay plantillas guardadas",
+  "deleteTemplateTooltip": "Eliminar plantilla",
+  "save": "Guardar"
 }

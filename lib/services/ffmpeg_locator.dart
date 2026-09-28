@@ -33,10 +33,17 @@ class FfmpegLocator {
     final bundledDir = Directory(
       '${File(Platform.resolvedExecutable).parent.path}${Platform.pathSeparator}tools',
     );
-    final bundledFfmpeg = File('${bundledDir.path}${Platform.pathSeparator}$exeName');
-    final bundledFfprobe = File('${bundledDir.path}${Platform.pathSeparator}$probeName');
+    final bundledFfmpeg = File(
+      '${bundledDir.path}${Platform.pathSeparator}$exeName',
+    );
+    final bundledFfprobe = File(
+      '${bundledDir.path}${Platform.pathSeparator}$probeName',
+    );
     if (await bundledFfmpeg.exists() && await bundledFfprobe.exists()) {
-      final result = FfmpegPaths(ffmpeg: bundledFfmpeg.path, ffprobe: bundledFfprobe.path);
+      final result = FfmpegPaths(
+        ffmpeg: bundledFfmpeg.path,
+        ffprobe: bundledFfprobe.path,
+      );
       _cached = result;
       return result;
     }
@@ -46,7 +53,10 @@ class FfmpegLocator {
       final envFfmpeg = File('$envDir${Platform.pathSeparator}$exeName');
       final envFfprobe = File('$envDir${Platform.pathSeparator}$probeName');
       if (await envFfmpeg.exists() && await envFfprobe.exists()) {
-        final result = FfmpegPaths(ffmpeg: envFfmpeg.path, ffprobe: envFfprobe.path);
+        final result = FfmpegPaths(
+          ffmpeg: envFfmpeg.path,
+          ffprobe: envFfprobe.path,
+        );
         _cached = result;
         return result;
       }

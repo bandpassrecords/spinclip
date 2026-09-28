@@ -43,7 +43,8 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
 
   bool _isMaximized = false;
 
-  static bool get _isDesktop => !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
+  static bool get _isDesktop =>
+      !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
 
   @override
   void initState() {
@@ -74,7 +75,8 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
 
   void _handleDragAreaTap() {
     final now = DateTime.now();
-    if (_lastDragAreaTap != null && now.difference(_lastDragAreaTap!) < const Duration(milliseconds: 350)) {
+    if (_lastDragAreaTap != null &&
+        now.difference(_lastDragAreaTap!) < const Duration(milliseconds: 350)) {
       _lastDragAreaTap = null;
       _toggleMaximize();
     } else {
@@ -92,7 +94,8 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb || (!Platform.isWindows && !Platform.isMacOS && !Platform.isLinux)) {
+    if (kIsWeb ||
+        (!Platform.isWindows && !Platform.isMacOS && !Platform.isLinux)) {
       return const SizedBox.shrink();
     }
 
@@ -109,7 +112,9 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor, width: 1)),
+        border: Border(
+          bottom: BorderSide(color: Theme.of(context).dividerColor, width: 1),
+        ),
       ),
       height: 40,
       child: Row(
@@ -131,7 +136,9 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
                     child: Text(
                       widget.title,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -139,7 +146,10 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
             ),
           ),
           // Window controls: completely outside the drag-area detector.
-          _WindowControlButtons(isMaximized: _isMaximized, onToggleMaximize: _toggleMaximize),
+          _WindowControlButtons(
+            isMaximized: _isMaximized,
+            onToggleMaximize: _toggleMaximize,
+          ),
         ],
       ),
     );
@@ -151,7 +161,10 @@ class _WindowControlButtons extends StatelessWidget {
   final bool isMaximized;
   final VoidCallback onToggleMaximize;
 
-  const _WindowControlButtons({required this.isMaximized, required this.onToggleMaximize});
+  const _WindowControlButtons({
+    required this.isMaximized,
+    required this.onToggleMaximize,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -159,9 +172,16 @@ class _WindowControlButtons extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(icon: Icon(Icons.minimize, size: 18, color: color), onPressed: () => windowManager.minimize()),
         IconButton(
-          icon: Icon(windowMaximizeToggleIcon(isMaximized), size: isMaximized ? 15 : 18, color: color),
+          icon: Icon(Icons.minimize, size: 18, color: color),
+          onPressed: () => windowManager.minimize(),
+        ),
+        IconButton(
+          icon: Icon(
+            windowMaximizeToggleIcon(isMaximized),
+            size: isMaximized ? 15 : 18,
+            color: color,
+          ),
           onPressed: onToggleMaximize,
         ),
         IconButton(

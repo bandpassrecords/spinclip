@@ -6,7 +6,11 @@ class PlatformPresetPicker extends StatelessWidget {
   final Set<String> selectedIds;
   final void Function(String presetId, bool selected) onToggle;
 
-  const PlatformPresetPicker({super.key, required this.selectedIds, required this.onToggle});
+  const PlatformPresetPicker({
+    super.key,
+    required this.selectedIds,
+    required this.onToggle,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -39,13 +39,14 @@ class TrackListEditor extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (var i = 0; i < tracks.length; i++) _TrackRow(
-          index: i,
-          track: tracks[i],
-          isMedley: isMedley,
-          onRemove: () => onRemoveTrack(i),
-          onUpdate: (t) => onUpdateTrack(i, t),
-        ),
+        for (var i = 0; i < tracks.length; i++)
+          _TrackRow(
+            index: i,
+            track: tracks[i],
+            isMedley: isMedley,
+            onRemove: () => onRemoveTrack(i),
+            onUpdate: (t) => onUpdateTrack(i, t),
+          ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: _addSongs,
@@ -72,6 +73,27 @@ class _TrackRow extends StatelessWidget {
     required this.onUpdate,
   });
 
+  Future<void> _pickCover(BuildContext context) async {
+    final result = await FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: const ['png', 'jpg', 'jpeg'],
+    );
+    final path = result?.path;
+    if (path != null) onUpdate(track.copyWith(imagePath: path));
+  }
+
+  void _clearCover() {
+    onUpdate(
+      Track.withTitle(
+        audioPath: track.audioPath,
+        fullDuration: track.fullDuration,
+        trimStartSeconds: track.trimStartSeconds,
+        trimDurationSeconds: track.trimDurationSeconds,
+        title: track.title,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -85,8 +107,42 @@ class _TrackRow extends StatelessWidget {
           children: [
             Row(
               children: [
-                Expanded(child: Text('${index + 1}. $name', overflow: TextOverflow.ellipsis)),
-                IconButton(icon: const Icon(Icons.delete_outline), onPressed: onRemove),
+                Expanded(
+                  child: Text(
+                    '${index + 1}. $name',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: onRemove,
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                const Icon(Icons.image_outlined, size: 16),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    track.imagePath != null
+                        ? p.basename(track.imagePath!)
+                        : l10n.trackDefaultCoverHint,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => _pickCover(context),
+                  child: Text(l10n.trackSetCover),
+                ),
+                if (track.imagePath != null)
+                  IconButton(
+                    icon: const Icon(Icons.clear, size: 16),
+                    tooltip: l10n.trackClearCoverTooltip,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: _clearCover,
+                  ),
               ],
             ),
             if (isMedley)
@@ -95,11 +151,15 @@ class _TrackRow extends StatelessWidget {
                   Expanded(
                     child: TextFormField(
                       initialValue: track.trimStartSeconds.toString(),
-                      decoration: InputDecoration(labelText: l10n.trackStartSeconds),
+                      decoration: InputDecoration(
+                        labelText: l10n.trackStartSeconds,
+                      ),
                       keyboardType: TextInputType.number,
                       onChanged: (v) {
                         final value = double.tryParse(v);
-                        if (value != null) onUpdate(track.copyWith(trimStartSeconds: value));
+                        if (value != null) {
+                          onUpdate(track.copyWith(trimStartSeconds: value));
+                        }
                       },
                     ),
                   ),
@@ -107,11 +167,20 @@ class _TrackRow extends StatelessWidget {
                   Expanded(
                     child: TextFormField(
                       initialValue: (track.trimDurationSeconds ?? 8).toString(),
-                      decoration: InputDecoration(labelText: l10n.trackExcerptDuration),
+                      decoration: InputDecoration(
+                        labelText: l10n.trackExcerptDuration,
+                      ),
                       keyboardType: TextInputType.number,
                       onChanged: (v) {
                         final value = double.tryParse(v);
-                        if (value != null) onUpdate(track.copyWith(trimDurationSeconds: value, fullDuration: false));
+                        if (value != null) {
+                          onUpdate(
+                            track.copyWith(
+                              trimDurationSeconds: value,
+                              fullDuration: false,
+                            ),
+                          );
+                        }
                       },
                     ),
                   ),

@@ -64,8 +64,14 @@ class MedleyRenderService {
 
         for (var ti = 0; ti < tracks.length; ti++) {
           final track = tracks[ti];
-          final segmentSettings = templateSettings.forTrack(track, defaultImagePath: defaultImagePath);
-          final segmentPath = p.join(tempDir.path, '${preset.id}_segment_$ti.mp4');
+          final segmentSettings = templateSettings.forTrack(
+            track,
+            defaultImagePath: defaultImagePath,
+          );
+          final segmentPath = p.join(
+            tempDir.path,
+            '${preset.id}_segment_$ti.mp4',
+          );
 
           final result = await videoRenderService.render(
             settings: segmentSettings,
@@ -74,15 +80,17 @@ class MedleyRenderService {
             qrAssetPath: qrAssetPath,
             useHardwareAcceleration: useHardwareAcceleration,
             onProgress: (percent) {
-              onProgress?.call(MedleyProgress(
-                presetIndex: pi,
-                presetCount: presets.length,
-                currentPreset: preset,
-                trackIndex: ti,
-                trackCount: tracks.length,
-                currentTrack: track,
-                percentWithinTrack: percent,
-              ));
+              onProgress?.call(
+                MedleyProgress(
+                  presetIndex: pi,
+                  presetCount: presets.length,
+                  currentPreset: preset,
+                  trackIndex: ti,
+                  trackCount: tracks.length,
+                  currentTrack: track,
+                  percentWithinTrack: percent,
+                ),
+              );
             },
           );
 
@@ -104,12 +112,25 @@ class MedleyRenderService {
         // Match the segments' own container so concat's stream copy doesn't
         // have to remux PCM audio into an MP4 that can't hold it.
         final extension = p.extension(segmentPaths.first);
-        final finalPath = p.join(outputDirectory, 'medley_${preset.id}$extension');
+        final finalPath = p.join(
+          outputDirectory,
+          'medley_${preset.id}$extension',
+        );
         try {
           await concatService.concat(segmentPaths, finalPath);
-          outcomes.add(MedleyOutcome(preset, RenderJobResult(success: true, outputPath: finalPath)));
+          outcomes.add(
+            MedleyOutcome(
+              preset,
+              RenderJobResult(success: true, outputPath: finalPath),
+            ),
+          );
         } catch (e) {
-          outcomes.add(MedleyOutcome(preset, RenderJobResult(success: false, errorMessage: e.toString())));
+          outcomes.add(
+            MedleyOutcome(
+              preset,
+              RenderJobResult(success: false, errorMessage: e.toString()),
+            ),
+          );
         }
       }
     } finally {

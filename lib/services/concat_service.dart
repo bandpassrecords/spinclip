@@ -17,18 +17,27 @@ class ConcatService {
     final paths = await locator.resolve();
 
     final listFile = File(
-      p.join(Directory.systemTemp.path, 'promo_concat_${DateTime.now().microsecondsSinceEpoch}.txt'),
+      p.join(
+        Directory.systemTemp.path,
+        'promo_concat_${DateTime.now().microsecondsSinceEpoch}.txt',
+      ),
     );
-    final content = inputPaths.map((path) => "file '${_escape(path)}'").join('\n');
+    final content = inputPaths
+        .map((path) => "file '${_escape(path)}'")
+        .join('\n');
     await listFile.writeAsString(content);
 
     try {
       final result = await Process.run(paths.ffmpeg, [
         '-y',
-        '-f', 'concat',
-        '-safe', '0',
-        '-i', listFile.path,
-        '-c', 'copy',
+        '-f',
+        'concat',
+        '-safe',
+        '0',
+        '-i',
+        listFile.path,
+        '-c',
+        'copy',
         outputPath,
       ]);
       if (result.exitCode != 0) {

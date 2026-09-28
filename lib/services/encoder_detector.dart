@@ -28,7 +28,10 @@ class EncoderDetector {
 
     try {
       final paths = await locator.resolve();
-      final result = await Process.run(paths.ffmpeg, ['-hide_banner', '-encoders']);
+      final result = await Process.run(paths.ffmpeg, [
+        '-hide_banner',
+        '-encoders',
+      ]);
       if (result.exitCode != 0) return null;
       final output = result.stdout.toString();
 

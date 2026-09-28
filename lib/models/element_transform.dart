@@ -7,7 +7,11 @@ class ElementTransform {
   final double dy;
   final double rotationDegrees;
 
-  const ElementTransform({this.dx = 0.5, this.dy = 0.5, this.rotationDegrees = 0});
+  const ElementTransform({
+    this.dx = 0.5,
+    this.dy = 0.5,
+    this.rotationDegrees = 0,
+  });
 
   static const center = ElementTransform(dx: 0.5, dy: 0.5);
   static const bottomRight = ElementTransform(dx: 0.90, dy: 0.90);
@@ -24,7 +28,10 @@ class ElementTransform {
 
   @override
   bool operator ==(Object other) =>
-      other is ElementTransform && other.dx == dx && other.dy == dy && other.rotationDegrees == rotationDegrees;
+      other is ElementTransform &&
+      other.dx == dx &&
+      other.dy == dy &&
+      other.rotationDegrees == rotationDegrees;
 
   @override
   int get hashCode => Object.hash(dx, dy, rotationDegrees);

@@ -21,7 +21,9 @@ Future<void> main() async {
     // reserves space for them). Windows/Linux debug: normal, for easy
     // development. Windows/Linux release: hidden, replaced by
     // DesktopTitleBar's custom Flutter title bar.
-    titleBarStyle: (!Platform.isMacOS && kDebugMode) ? TitleBarStyle.normal : TitleBarStyle.hidden,
+    titleBarStyle: (!Platform.isMacOS && kDebugMode)
+        ? TitleBarStyle.normal
+        : TitleBarStyle.hidden,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();

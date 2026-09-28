@@ -29,9 +29,13 @@ class AudioTrimSlider extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final maxDuration = probedDurationSeconds ?? 300;
-    final effectiveDuration = trimDurationSeconds ?? (maxDuration - trimStartSeconds).clamp(1, maxDuration);
+    final effectiveDuration =
+        trimDurationSeconds ??
+        (maxDuration - trimStartSeconds).clamp(1, maxDuration);
     final start = trimStartSeconds.clamp(0, maxDuration).toDouble();
-    final end = (start + effectiveDuration).clamp(start, maxDuration).toDouble();
+    final end = (start + effectiveDuration)
+        .clamp(start, maxDuration)
+        .toDouble();
 
     String fmt(double seconds) {
       final m = (seconds ~/ 60).toString().padLeft(2, '0');
@@ -57,7 +61,13 @@ class AudioTrimSlider extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
-          Text(l10n.trimRangeLabel(fmt(start), fmt(end), effectiveDuration.toStringAsFixed(1))),
+          Text(
+            l10n.trimRangeLabel(
+              fmt(start),
+              fmt(end),
+              effectiveDuration.toStringAsFixed(1),
+            ),
+          ),
           RangeSlider(
             values: RangeValues(start, end),
             min: 0,
@@ -65,7 +75,9 @@ class AudioTrimSlider extends StatelessWidget {
             labels: RangeLabels(fmt(start), fmt(end)),
             onChanged: (values) {
               onStartChanged(values.start);
-              onDurationChanged((values.end - values.start).clamp(0.1, maxDuration));
+              onDurationChanged(
+                (values.end - values.start).clamp(0.1, maxDuration),
+              );
             },
           ),
         ],

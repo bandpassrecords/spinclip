@@ -65,7 +65,9 @@ class _AudioPreviewPlayerState extends ConsumerState<AudioPreviewPlayer> {
   Future<void> _loadPeaks() async {
     setState(() => _loadingPeaks = true);
     try {
-      final peaks = await ref.read(waveformPeaksServiceProvider).extractPeaks(widget.audioPath);
+      final peaks = await ref
+          .read(waveformPeaksServiceProvider)
+          .extractPeaks(widget.audioPath);
       if (!mounted) return;
       setState(() {
         _peaks = peaks;
@@ -88,7 +90,9 @@ class _AudioPreviewPlayerState extends ConsumerState<AudioPreviewPlayer> {
 
   Future<void> _stopAndRewind() async {
     await _player.pause();
-    await _player.seek(Duration(milliseconds: (widget.startSeconds * 1000).round()));
+    await _player.seek(
+      Duration(milliseconds: (widget.startSeconds * 1000).round()),
+    );
     if (!mounted) return;
     setState(() {
       _isPlaying = false;
@@ -105,8 +109,11 @@ class _AudioPreviewPlayerState extends ConsumerState<AudioPreviewPlayer> {
     // Restart from the selection's start if we're outside it (e.g. after it
     // finished, or the selection changed since we last played).
     final startMs = (widget.startSeconds * 1000).round();
-    final endMs = widget.endSeconds != null ? (widget.endSeconds! * 1000).round() : null;
-    if (_position.inMilliseconds < startMs || (endMs != null && _position.inMilliseconds >= endMs)) {
+    final endMs = widget.endSeconds != null
+        ? (widget.endSeconds! * 1000).round()
+        : null;
+    if (_position.inMilliseconds < startMs ||
+        (endMs != null && _position.inMilliseconds >= endMs)) {
       await _player.seek(Duration(milliseconds: startMs));
     }
     await _player.play(DeviceFileSource(widget.audioPath));
@@ -128,10 +135,15 @@ class _AudioPreviewPlayerState extends ConsumerState<AudioPreviewPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    final total = widget.totalDurationSeconds > 0 ? widget.totalDurationSeconds : 1.0;
+    final total = widget.totalDurationSeconds > 0
+        ? widget.totalDurationSeconds
+        : 1.0;
     final startFraction = (widget.startSeconds / total).clamp(0.0, 1.0);
     final endFraction = ((widget.endSeconds ?? total) / total).clamp(0.0, 1.0);
-    final playheadFraction = (_position.inMilliseconds / 1000 / total).clamp(0.0, 1.0);
+    final playheadFraction = (_position.inMilliseconds / 1000 / total).clamp(
+      0.0,
+      1.0,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

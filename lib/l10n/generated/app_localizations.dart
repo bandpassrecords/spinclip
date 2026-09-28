@@ -692,6 +692,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mild old-school aging: warm tone, soft vignette, light film grain.'**
   String get vintageEffectSubtitle;
+
+  /// No description provided for @filesStepRequiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A cover image and audio are required to continue.'**
+  String get filesStepRequiredHint;
+
+  /// No description provided for @trackDefaultCoverHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses the default cover'**
+  String get trackDefaultCoverHint;
+
+  /// No description provided for @trackSetCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Set cover'**
+  String get trackSetCover;
+
+  /// No description provided for @trackClearCoverTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove custom cover'**
+  String get trackClearCoverTooltip;
+
+  /// No description provided for @loadTemplateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Load template'**
+  String get loadTemplateButton;
+
+  /// No description provided for @saveAsTemplateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as template'**
+  String get saveAsTemplateButton;
+
+  /// No description provided for @templateNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Template name'**
+  String get templateNameLabel;
+
+  /// No description provided for @noTemplatesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved templates yet'**
+  String get noTemplatesSaved;
+
+  /// No description provided for @deleteTemplateTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete template'**
+  String get deleteTemplateTooltip;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
 }
 
 class _AppLocalizationsDelegate
