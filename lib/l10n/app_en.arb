@@ -188,6 +188,18 @@
   "resolutionHeightLabel": "Height",
   "resetResolutionTooltip": "Reset to default resolution",
 
+  "outputSubfolderLabel": "Output subfolder name (optional)",
+  "outputSubfolderHint": "Defaults to \"{name}\", from the cover image",
+  "@outputSubfolderHint": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "overwriteConfirmTitle": "Folder already has files",
+  "overwriteConfirmMessage": "\"{path}\" already contains files from a previous render. Rendering again will overwrite them.",
+  "@overwriteConfirmMessage": {
+    "placeholders": {"path": {"type": "String"}}
+  },
+  "overwriteConfirmButton": "Overwrite",
+
   "trackDefaultCoverHint": "Uses the default cover",
   "trackSetCover": "Set cover",
   "trackClearCoverTooltip": "Remove custom cover",

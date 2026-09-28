@@ -10,8 +10,11 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: SpinclipApp()));
 
     expect(find.text('Spinclip'), findsOneWidget);
-    // The wizard opens on the first page (Release type).
-    expect(find.textContaining('Release type'), findsOneWidget);
-    expect(find.text('Single song'), findsOneWidget);
+    // The wizard opens on the first page (Release type). The persistent
+    // summary panel also shows "Release type"/"Single song" (its label and
+    // current value) alongside the wizard step itself, so more than one
+    // match is expected rather than exactly one.
+    expect(find.textContaining('Release type'), findsWidgets);
+    expect(find.text('Single song'), findsWidgets);
   });
 }

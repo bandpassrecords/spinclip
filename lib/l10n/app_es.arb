@@ -127,6 +127,12 @@
   "resolutionHeightLabel": "Alto",
   "resetResolutionTooltip": "Restablecer resolución predeterminada",
 
+  "outputSubfolderLabel": "Nombre de la subcarpeta de salida (opcional)",
+  "outputSubfolderHint": "Usa \"{name}\" de forma predeterminada, a partir de la imagen de portada",
+  "overwriteConfirmTitle": "La carpeta ya tiene archivos",
+  "overwriteConfirmMessage": "\"{path}\" ya contiene archivos de una renderización anterior. Renderizar de nuevo los sobrescribirá.",
+  "overwriteConfirmButton": "Sobrescribir",
+
   "trackDefaultCoverHint": "Usa la portada predeterminada",
   "trackSetCover": "Definir portada",
   "trackClearCoverTooltip": "Quitar portada personalizada",

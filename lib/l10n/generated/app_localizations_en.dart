@@ -373,6 +373,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetResolutionTooltip => 'Reset to default resolution';
 
   @override
+  String get outputSubfolderLabel => 'Output subfolder name (optional)';
+
+  @override
+  String outputSubfolderHint(String name) {
+    return 'Defaults to \"$name\", from the cover image';
+  }
+
+  @override
+  String get overwriteConfirmTitle => 'Folder already has files';
+
+  @override
+  String overwriteConfirmMessage(String path) {
+    return '\"$path\" already contains files from a previous render. Rendering again will overwrite them.';
+  }
+
+  @override
+  String get overwriteConfirmButton => 'Overwrite';
+
+  @override
   String get trackDefaultCoverHint => 'Uses the default cover';
 
   @override

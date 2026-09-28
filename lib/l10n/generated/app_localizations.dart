@@ -741,6 +741,36 @@ abstract class AppLocalizations {
   /// **'Reset to default resolution'**
   String get resetResolutionTooltip;
 
+  /// No description provided for @outputSubfolderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Output subfolder name (optional)'**
+  String get outputSubfolderLabel;
+
+  /// No description provided for @outputSubfolderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Defaults to \"{name}\", from the cover image'**
+  String outputSubfolderHint(String name);
+
+  /// No description provided for @overwriteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder already has files'**
+  String get overwriteConfirmTitle;
+
+  /// No description provided for @overwriteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{path}\" already contains files from a previous render. Rendering again will overwrite them.'**
+  String overwriteConfirmMessage(String path);
+
+  /// No description provided for @overwriteConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Overwrite'**
+  String get overwriteConfirmButton;
+
   /// No description provided for @trackDefaultCoverHint.
   ///
   /// In en, this message translates to:

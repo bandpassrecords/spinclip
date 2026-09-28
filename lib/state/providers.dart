@@ -25,6 +25,7 @@ import '../services/preview_service.dart';
 import '../services/qr_code_service.dart';
 import '../services/template_store_service.dart';
 import '../services/video_render_service.dart';
+import '../util/output_folder_naming.dart';
 
 class DraftSettings {
   final ReleaseMode releaseMode;
@@ -68,6 +69,11 @@ class DraftSettings {
   /// absent presets render at their built-in default resolution.
   final Map<String, (int, int)> resolutionOverrides;
   final String? outputDirectory;
+
+  /// User override for the per-release subfolder name under
+  /// [outputDirectory]; empty means auto-derive from the cover image's
+  /// filename at render time (see resolveOutputSubfolderName).
+  final String outputSubfolderName;
   final bool useHardwareAcceleration;
   final bool losslessAudio;
   final bool vintageEffect;
@@ -106,6 +112,7 @@ class DraftSettings {
     this.selectedPresetIds = const {'youtube'},
     this.resolutionOverrides = const {},
     this.outputDirectory,
+    this.outputSubfolderName = '',
     this.useHardwareAcceleration = true,
     this.losslessAudio = true,
     this.vintageEffect = false,
@@ -245,6 +252,7 @@ class DraftSettings {
     Set<String>? selectedPresetIds,
     Map<String, (int, int)>? resolutionOverrides,
     String? outputDirectory,
+    String? outputSubfolderName,
     bool? useHardwareAcceleration,
     bool? losslessAudio,
     bool? vintageEffect,
@@ -285,6 +293,7 @@ class DraftSettings {
       selectedPresetIds: selectedPresetIds ?? this.selectedPresetIds,
       resolutionOverrides: resolutionOverrides ?? this.resolutionOverrides,
       outputDirectory: outputDirectory ?? this.outputDirectory,
+      outputSubfolderName: outputSubfolderName ?? this.outputSubfolderName,
       useHardwareAcceleration:
           useHardwareAcceleration ?? this.useHardwareAcceleration,
       losslessAudio: losslessAudio ?? this.losslessAudio,
@@ -324,6 +333,8 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
 
   void setOutputDirectory(String path) =>
       state = state.copyWith(outputDirectory: path);
+  void setOutputSubfolderName(String name) =>
+      state = state.copyWith(outputSubfolderName: name);
   void setSnippetDuration(double v) =>
       state = state.copyWith(snippetDurationSeconds: v);
   void setUseHardwareAcceleration(bool v) =>
@@ -557,6 +568,28 @@ class RenderJobNotifier extends Notifier<RenderProgress> {
     return const RenderProgress();
   }
 
+  /// Where this session would render to: the chosen (or default) output
+  /// directory, plus a per-release subfolder so different releases don't
+  /// land in the same place and silently overwrite each other. Exposed so
+  /// the UI can check for an overwrite before actually starting the render.
+  Future<String> resolveOutputDirectory(DraftSettings draft) async {
+    final base = draft.outputDirectory ?? await _defaultOutputDirectory();
+    final subfolder = resolveOutputSubfolderName(
+      customName: draft.outputSubfolderName,
+      imagePath: draft.imagePath,
+    );
+    return p.join(base, subfolder);
+  }
+
+  /// Whether [outputDir] already exists and has anything in it - the UI
+  /// prompts to confirm overwriting when this is true, rather than silently
+  /// clobbering a previous render.
+  Future<bool> outputDirectoryHasExistingFiles(String outputDir) async {
+    final dir = Directory(outputDir);
+    if (!await dir.exists()) return false;
+    return !(await dir.list().isEmpty);
+  }
+
   Future<void> startRender() async {
     final draft = ref.read(draftSettingsProvider);
     if (!draft.isReadyToRender) {
@@ -570,7 +603,7 @@ class RenderJobNotifier extends Notifier<RenderProgress> {
 
     state = const RenderProgress(phase: RenderPhase.probing);
 
-    final outputDir = draft.outputDirectory ?? await _defaultOutputDirectory();
+    final outputDir = await resolveOutputDirectory(draft);
     final presets = draft.selectedPresets;
 
     // Generated once per render session (content doesn't vary per preset or

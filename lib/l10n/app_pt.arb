@@ -127,6 +127,12 @@
   "resolutionHeightLabel": "Altura",
   "resetResolutionTooltip": "Restaurar resolução padrão",
 
+  "outputSubfolderLabel": "Nome da subpasta de saída (opcional)",
+  "outputSubfolderHint": "Usa \"{name}\" por padrão, a partir da imagem de capa",
+  "overwriteConfirmTitle": "A pasta já contém arquivos",
+  "overwriteConfirmMessage": "\"{path}\" já contém arquivos de uma renderização anterior. Renderizar novamente irá sobrescrevê-los.",
+  "overwriteConfirmButton": "Sobrescrever",
+
   "trackDefaultCoverHint": "Usa a capa padrão",
   "trackSetCover": "Definir capa",
   "trackClearCoverTooltip": "Remover capa personalizada",

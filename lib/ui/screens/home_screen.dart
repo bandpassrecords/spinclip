@@ -11,6 +11,7 @@ import '../../models/visualizer_placement.dart';
 import '../../models/visualizer_style.dart';
 import '../../state/providers.dart';
 import '../../util/color_hex.dart';
+import '../../util/output_folder_naming.dart';
 import '../widgets/audio_preview_player.dart';
 import '../widgets/audio_trim_slider.dart';
 import '../widgets/customization_panel.dart';
@@ -180,9 +181,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   String _outputSummary(AppLocalizations l10n, DraftSettings draft) {
     final dir = draft.outputDirectory ?? l10n.outputDirectoryDefault;
+    final subfolder = resolveOutputSubfolderName(
+      customName: draft.outputSubfolderName,
+      imagePath: draft.imagePath,
+    );
     final hw = draft.useHardwareAcceleration ? l10n.summaryOn : l10n.summaryOff;
     final lossless = draft.losslessAudio ? l10n.summaryOn : l10n.summaryOff;
-    return '$dir · ${l10n.hardwareAcceleration}: $hw · ${l10n.losslessAudio}: $lossless';
+    return '$dir/$subfolder · ${l10n.hardwareAcceleration}: $hw · ${l10n.losslessAudio}: $lossless';
+  }
+
+  Future<bool> _confirmOverwrite(String outputDir) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.overwriteConfirmTitle),
+        content: Text(l10n.overwriteConfirmMessage(outputDir)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.overwriteConfirmButton),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
   }
 
   @override
@@ -496,6 +523,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onDirectorySelected: draftNotifier.setOutputDirectory,
               ),
               const SizedBox(height: 16),
+              TextFormField(
+                initialValue: draft.outputSubfolderName,
+                decoration: InputDecoration(
+                  labelText: l10n.outputSubfolderLabel,
+                  helperText: l10n.outputSubfolderHint(
+                    resolveOutputSubfolderName(
+                      customName: '',
+                      imagePath: draft.imagePath,
+                    ),
+                  ),
+                ),
+                onChanged: draftNotifier.setOutputSubfolderName,
+              ),
+              const SizedBox(height: 16),
               PerformancePanel(
                 useHardwareAcceleration: draft.useHardwareAcceleration,
                 onHardwareAccelerationChanged:
@@ -511,58 +552,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l10n.reviewSummaryTitle,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            ReviewSummaryRow(
-              label: l10n.stepReleaseType,
-              value: _releaseModeSummary(l10n, draft),
-              onEdit: () => _goTo(stepReleaseTypeIndex),
-            ),
-            ReviewSummaryRow(
-              label: l10n.stepFiles,
-              value: _filesSummary(l10n, draft),
-              onEdit: () => _goTo(stepFilesIndex),
-            ),
-            ReviewSummaryRow(
-              label: l10n.stepVisualizer,
-              value:
-                  '${draft.placement.label(l10n)} · ${draft.style.label(l10n)}',
-              onEdit: () => stepVisualizerIndex != null
-                  ? _goTo(stepVisualizerIndex)
-                  : _enableAdvancedAndGoTo(advancedVisualizerIndex),
-            ),
-            ReviewSummaryRow(
-              label: l10n.stepCustomize,
-              value: _customizeSummary(l10n, draft),
-              onEdit: () => stepCustomizeIndex != null
-                  ? _goTo(stepCustomizeIndex)
-                  : _enableAdvancedAndGoTo(advancedCustomizeIndex),
-            ),
-            if (hasDurationStep)
-              ReviewSummaryRow(
-                label: l10n.stepDuration,
-                value: _durationSummary(l10n, draft),
-                onEdit: () => stepDurationIndex != null
-                    ? _goTo(stepDurationIndex)
-                    : _enableAdvancedAndGoTo(advancedDurationIndex!),
-              ),
-            ReviewSummaryRow(
-              label: l10n.stepPlatforms,
-              value: _platformsSummary(l10n, draft),
-              onEdit: () => _goTo(stepPlatformsIndex),
-            ),
-            ReviewSummaryRow(
-              label: l10n.stepOutputPerformance,
-              value: _outputSummary(l10n, draft),
-              onEdit: () => stepOutputIndex != null
-                  ? _goTo(stepOutputIndex)
-                  : _enableAdvancedAndGoTo(advancedOutputIndex),
-            ),
-            const SizedBox(height: 16),
-            const Divider(),
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
@@ -700,7 +689,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   FilledButton.icon(
                                     onPressed:
                                         (draft.isReadyToRender && !isRendering)
-                                        ? () {
+                                        ? () async {
+                                            final outputDir =
+                                                await renderNotifier
+                                                    .resolveOutputDirectory(
+                                                      draft,
+                                                    );
+                                            final hasExisting = await renderNotifier
+                                                .outputDirectoryHasExistingFiles(
+                                                  outputDir,
+                                                );
+                                            if (hasExisting &&
+                                                !await _confirmOverwrite(
+                                                  outputDir,
+                                                )) {
+                                              return;
+                                            }
                                             final templateName =
                                                 _templateNameController.text
                                                     .trim();
@@ -737,13 +741,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     color: Theme.of(context).colorScheme.surfaceContainerLow,
                     padding: const EdgeInsets.all(24),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           l10n.preview,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 16),
-                        Expanded(
+                        SizedBox(
+                          width: double.infinity,
                           child: Center(
                             child: PreviewPanel(
                               settings: previewSettings,
@@ -752,12 +758,85 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                           ),
                         ),
-                        Text(
-                          l10n.previewPresetLabel(
-                            previewPreset.name,
-                            previewPreset.aspectRatioLabel,
+                        const SizedBox(height: 8),
+                        Center(
+                          child: Text(
+                            l10n.previewPresetLabel(
+                              previewPreset.name,
+                              previewPreset.aspectRatioLabel,
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 16),
+                        const Divider(),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.reviewSummaryTitle,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ReviewSummaryRow(
+                                  label: l10n.stepReleaseType,
+                                  value: _releaseModeSummary(l10n, draft),
+                                  onEdit: () => _goTo(stepReleaseTypeIndex),
+                                ),
+                                ReviewSummaryRow(
+                                  label: l10n.stepFiles,
+                                  value: _filesSummary(l10n, draft),
+                                  onEdit: () => _goTo(stepFilesIndex),
+                                ),
+                                ReviewSummaryRow(
+                                  label: l10n.stepVisualizer,
+                                  value:
+                                      '${draft.placement.label(l10n)} · ${draft.style.label(l10n)}',
+                                  onEdit: () => stepVisualizerIndex != null
+                                      ? _goTo(stepVisualizerIndex)
+                                      : _enableAdvancedAndGoTo(
+                                          advancedVisualizerIndex,
+                                        ),
+                                ),
+                                ReviewSummaryRow(
+                                  label: l10n.stepCustomize,
+                                  value: _customizeSummary(l10n, draft),
+                                  onEdit: () => stepCustomizeIndex != null
+                                      ? _goTo(stepCustomizeIndex)
+                                      : _enableAdvancedAndGoTo(
+                                          advancedCustomizeIndex,
+                                        ),
+                                ),
+                                if (hasDurationStep)
+                                  ReviewSummaryRow(
+                                    label: l10n.stepDuration,
+                                    value: _durationSummary(l10n, draft),
+                                    onEdit: () => stepDurationIndex != null
+                                        ? _goTo(stepDurationIndex)
+                                        : _enableAdvancedAndGoTo(
+                                            advancedDurationIndex!,
+                                          ),
+                                  ),
+                                ReviewSummaryRow(
+                                  label: l10n.stepPlatforms,
+                                  value: _platformsSummary(l10n, draft),
+                                  onEdit: () => _goTo(stepPlatformsIndex),
+                                ),
+                                ReviewSummaryRow(
+                                  label: l10n.stepOutputPerformance,
+                                  value: _outputSummary(l10n, draft),
+                                  onEdit: () => stepOutputIndex != null
+                                      ? _goTo(stepOutputIndex)
+                                      : _enableAdvancedAndGoTo(
+                                          advancedOutputIndex,
+                                        ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),

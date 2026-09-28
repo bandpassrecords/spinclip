@@ -375,6 +375,25 @@ class AppLocalizationsPt extends AppLocalizations {
   String get resetResolutionTooltip => 'Restaurar resolução padrão';
 
   @override
+  String get outputSubfolderLabel => 'Nome da subpasta de saída (opcional)';
+
+  @override
+  String outputSubfolderHint(String name) {
+    return 'Usa \"$name\" por padrão, a partir da imagem de capa';
+  }
+
+  @override
+  String get overwriteConfirmTitle => 'A pasta já contém arquivos';
+
+  @override
+  String overwriteConfirmMessage(String path) {
+    return '\"$path\" já contém arquivos de uma renderização anterior. Renderizar novamente irá sobrescrevê-los.';
+  }
+
+  @override
+  String get overwriteConfirmButton => 'Sobrescrever';
+
+  @override
   String get trackDefaultCoverHint => 'Usa a capa padrão';
 
   @override

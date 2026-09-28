@@ -376,6 +376,26 @@ class AppLocalizationsEs extends AppLocalizations {
   String get resetResolutionTooltip => 'Restablecer resolución predeterminada';
 
   @override
+  String get outputSubfolderLabel =>
+      'Nombre de la subcarpeta de salida (opcional)';
+
+  @override
+  String outputSubfolderHint(String name) {
+    return 'Usa \"$name\" de forma predeterminada, a partir de la imagen de portada';
+  }
+
+  @override
+  String get overwriteConfirmTitle => 'La carpeta ya tiene archivos';
+
+  @override
+  String overwriteConfirmMessage(String path) {
+    return '\"$path\" ya contiene archivos de una renderización anterior. Renderizar de nuevo los sobrescribirá.';
+  }
+
+  @override
+  String get overwriteConfirmButton => 'Sobrescribir';
+
+  @override
   String get trackDefaultCoverHint => 'Usa la portada predeterminada';
 
   @override
