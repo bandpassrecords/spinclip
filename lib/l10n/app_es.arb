@@ -118,6 +118,9 @@
 
   "filesStepRequiredHint": "Se requiere una imagen de portada y audio para continuar.",
 
+  "advancedModeLabel": "Ajustes avanzados",
+  "advancedModeSubtitle": "Ajusta el visualizador, las superposiciones, el tiempo y las opciones de exportación. Desactivado usa valores predeterminados razonables para todo esto.",
+
   "trackDefaultCoverHint": "Usa la portada predeterminada",
   "trackSetCover": "Definir portada",
   "trackClearCoverTooltip": "Quitar portada personalizada",

@@ -353,6 +353,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Se requiere una imagen de portada y audio para continuar.';
 
   @override
+  String get advancedModeLabel => 'Ajustes avanzados';
+
+  @override
+  String get advancedModeSubtitle =>
+      'Ajusta el visualizador, las superposiciones, el tiempo y las opciones de exportación. Desactivado usa valores predeterminados razonables para todo esto.';
+
+  @override
   String get trackDefaultCoverHint => 'Usa la portada predeterminada';
 
   @override

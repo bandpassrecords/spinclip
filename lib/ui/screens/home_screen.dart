@@ -45,6 +45,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _saveAsTemplate = false;
   final _templateNameController = TextEditingController();
 
+  // Easy path by default: only Release type, Files, Platforms, and Review &
+  // render are shown, every other setting using its sensible default.
+  // Turning this on (from the Release type step, or by editing a Review row
+  // that lives behind it) reveals Visualizer, Customize, Duration and
+  // Output & performance for full control.
+  bool _advancedMode = false;
+
   static const _pageTransitionDuration = Duration(milliseconds: 320);
   static const _pageTransitionCurve = Curves.easeInOutCubic;
 
@@ -61,6 +68,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       duration: _pageTransitionDuration,
       curve: _pageTransitionCurve,
     );
+  }
+
+  /// Turns on advanced mode (revealing the steps it gates) and jumps to
+  /// [index] once the page list has grown to include it - used by the
+  /// Review step's "edit" links for a category that's currently hidden
+  /// behind the easy path.
+  void _enableAdvancedAndGoTo(int index) {
+    setState(() => _advancedMode = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_pageController.hasClients) _goTo(index);
+    });
   }
 
   /// A settings snapshot for the live preview: the actual RenderSettings
@@ -185,17 +203,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         : PlatformPreset.youtube;
 
     // Fixed step order (see the `pages` list below): Release type, Files,
-    // Visualizer, Customize, [Duration - single mode only], Platforms,
-    // Output & performance, Review & render. Tracked explicitly so the
-    // summary's "edit" links can jump straight to the right page.
+    // [Visualizer, Customize, [Duration - single mode only] - advanced mode
+    // only], Platforms, [Output & performance - advanced mode only],
+    // Review & render. Tracked explicitly so the summary's "edit" links can
+    // jump straight to the right page.
     const stepReleaseTypeIndex = 0;
     const stepFilesIndex = 1;
-    const stepVisualizerIndex = 2;
-    const stepCustomizeIndex = 3;
     final hasDurationStep = draft.releaseMode == ReleaseMode.single;
-    final stepDurationIndex = hasDurationStep ? 4 : null;
-    final stepPlatformsIndex = hasDurationStep ? 5 : 4;
-    final stepOutputIndex = stepPlatformsIndex + 1;
+
+    // Where each advanced-only step lands once advanced mode is on -
+    // doubles as the jump target when a Review row turns advanced mode on
+    // from the easy path, since that's exactly where the step will be.
+    const advancedVisualizerIndex = 2;
+    const advancedCustomizeIndex = 3;
+    final advancedDurationIndex = hasDurationStep ? 4 : null;
+    final advancedPlatformsIndex = hasDurationStep ? 5 : 4;
+    final advancedOutputIndex = advancedPlatformsIndex + 1;
+
+    final stepVisualizerIndex = _advancedMode ? advancedVisualizerIndex : null;
+    final stepCustomizeIndex = _advancedMode ? advancedCustomizeIndex : null;
+    final stepDurationIndex = _advancedMode ? advancedDurationIndex : null;
+    final stepPlatformsIndex = _advancedMode ? advancedPlatformsIndex : 2;
+    final stepOutputIndex = _advancedMode ? advancedOutputIndex : null;
 
     final pages = <(String, Widget)>[
       (
@@ -226,6 +255,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
               selected: {draft.releaseMode},
               onSelectionChanged: (s) => draftNotifier.setReleaseMode(s.first),
+            ),
+            const SizedBox(height: 16),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _advancedMode,
+              onChanged: (v) => setState(() => _advancedMode = v),
+              title: Text(l10n.advancedModeLabel),
+              subtitle: Text(l10n.advancedModeSubtitle),
             ),
           ],
         ),
@@ -284,140 +321,142 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
       ),
-      (
-        l10n.stepVisualizer,
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            VisualizerPlacementPicker(
-              value: draft.placement,
-              onChanged: draftNotifier.setPlacement,
-            ),
-            const SizedBox(height: 8),
-            VisualizerStylePicker(
-              value: draft.style,
-              onChanged: draftNotifier.setStyle,
-            ),
-          ],
+      if (_advancedMode)
+        (
+          l10n.stepVisualizer,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              VisualizerPlacementPicker(
+                value: draft.placement,
+                onChanged: draftNotifier.setPlacement,
+              ),
+              const SizedBox(height: 8),
+              VisualizerStylePicker(
+                value: draft.style,
+                onChanged: draftNotifier.setStyle,
+              ),
+            ],
+          ),
         ),
-      ),
-      (
-        l10n.stepCustomize,
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomizationPanel(
-              blurRadius: draft.blurRadius,
-              onBlurChanged: draftNotifier.setBlurRadius,
-              visualizerSmoothness: draft.visualizerSmoothness,
-              onVisualizerSmoothnessChanged:
-                  draftNotifier.setVisualizerSmoothness,
-              visualizerColorHex: draft.visualizerColorHex,
-              onVisualizerColorChanged: draftNotifier.setColor,
-              coverImagePath: draft.imagePath,
-              vintageEffect: draft.vintageEffect,
-              onVintageEffectChanged: draftNotifier.setVintageEffect,
-              showCover: draft.showCover,
-              onShowCoverChanged: draftNotifier.setShowCover,
-              coverSizeFraction: draft.coverSizeFraction,
-              onCoverSizeFractionChanged: draftNotifier.setCoverSizeFraction,
-              showLogo: draft.showLogo,
-              onShowLogoChanged: draftNotifier.setShowLogo,
-              logoImagePath: draft.logoImagePath,
-              onLogoPathChanged: draftNotifier.setLogoImagePath,
-              showText: draft.showText,
-              onShowTextChanged: draftNotifier.setShowText,
-              textContent: draft.textContent,
-              onTextContentChanged: draftNotifier.setTextContent,
-              showQrCode: draft.showQrCode,
-              onShowQrCodeChanged: draftNotifier.setShowQrCode,
-              qrCodeContent: draft.qrCodeContent,
-              onQrCodeContentChanged: draftNotifier.setQrCodeContent,
-              qrCaptionText: draft.qrCaptionText,
-              onQrCaptionTextChanged: draftNotifier.setQrCaptionText,
-              qrCaptionPosition: draft.qrCaptionPosition,
-              onQrCaptionPositionChanged: draftNotifier.setQrCaptionPosition,
-              fadeInSeconds: draft.fadeInSeconds,
-              onFadeInChanged: draftNotifier.setFadeInSeconds,
-              fadeOutSeconds: draft.fadeOutSeconds,
-              onFadeOutChanged: draftNotifier.setFadeOutSeconds,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.positionAndRotate,
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                TextButton.icon(
-                  onPressed: draftNotifier.resetTransforms,
-                  icon: const Icon(Icons.restart_alt, size: 18),
-                  label: Text(l10n.resetPositions),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            PositionCanvas(
-              frameWidth: previewPreset.width,
-              frameHeight: previewPreset.height,
-              items: [
-                PositionableItem(
-                  id: 'cover',
-                  label: l10n.elementCover,
-                  icon: Icons.image_outlined,
-                  color: Colors.blueAccent,
-                  transform: draft.coverTransform,
-                  enabled: draft.showCover,
-                  supportsRotation: false,
-                ),
-                PositionableItem(
-                  id: 'logo',
-                  label: l10n.elementLogo,
-                  icon: Icons.branding_watermark_outlined,
-                  color: Colors.deepPurpleAccent,
-                  transform: draft.logoTransform,
-                  enabled: draft.showLogo,
-                ),
-                PositionableItem(
-                  id: 'text',
-                  label: l10n.elementText,
-                  icon: Icons.text_fields,
-                  color: Colors.orangeAccent,
-                  transform: draft.textTransform,
-                  enabled: draft.showText,
-                  supportsRotation: false,
-                ),
-                PositionableItem(
-                  id: 'qr',
-                  label: l10n.elementQrCode,
-                  icon: Icons.qr_code,
-                  color: Colors.teal,
-                  transform: draft.qrTransform,
-                  enabled: draft.showQrCode,
-                ),
-              ],
-              onChanged: (id, transform) {
-                switch (id) {
-                  case 'cover':
-                    draftNotifier.setCoverTransform(transform);
-                    break;
-                  case 'logo':
-                    draftNotifier.setLogoTransform(transform);
-                    break;
-                  case 'text':
-                    draftNotifier.setTextTransform(transform);
-                    break;
-                  case 'qr':
-                    draftNotifier.setQrTransform(transform);
-                    break;
-                }
-              },
-            ),
-          ],
+      if (_advancedMode)
+        (
+          l10n.stepCustomize,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomizationPanel(
+                blurRadius: draft.blurRadius,
+                onBlurChanged: draftNotifier.setBlurRadius,
+                visualizerSmoothness: draft.visualizerSmoothness,
+                onVisualizerSmoothnessChanged:
+                    draftNotifier.setVisualizerSmoothness,
+                visualizerColorHex: draft.visualizerColorHex,
+                onVisualizerColorChanged: draftNotifier.setColor,
+                coverImagePath: draft.imagePath,
+                vintageEffect: draft.vintageEffect,
+                onVintageEffectChanged: draftNotifier.setVintageEffect,
+                showCover: draft.showCover,
+                onShowCoverChanged: draftNotifier.setShowCover,
+                coverSizeFraction: draft.coverSizeFraction,
+                onCoverSizeFractionChanged: draftNotifier.setCoverSizeFraction,
+                showLogo: draft.showLogo,
+                onShowLogoChanged: draftNotifier.setShowLogo,
+                logoImagePath: draft.logoImagePath,
+                onLogoPathChanged: draftNotifier.setLogoImagePath,
+                showText: draft.showText,
+                onShowTextChanged: draftNotifier.setShowText,
+                textContent: draft.textContent,
+                onTextContentChanged: draftNotifier.setTextContent,
+                showQrCode: draft.showQrCode,
+                onShowQrCodeChanged: draftNotifier.setShowQrCode,
+                qrCodeContent: draft.qrCodeContent,
+                onQrCodeContentChanged: draftNotifier.setQrCodeContent,
+                qrCaptionText: draft.qrCaptionText,
+                onQrCaptionTextChanged: draftNotifier.setQrCaptionText,
+                qrCaptionPosition: draft.qrCaptionPosition,
+                onQrCaptionPositionChanged: draftNotifier.setQrCaptionPosition,
+                fadeInSeconds: draft.fadeInSeconds,
+                onFadeInChanged: draftNotifier.setFadeInSeconds,
+                fadeOutSeconds: draft.fadeOutSeconds,
+                onFadeOutChanged: draftNotifier.setFadeOutSeconds,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.positionAndRotate,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  TextButton.icon(
+                    onPressed: draftNotifier.resetTransforms,
+                    icon: const Icon(Icons.restart_alt, size: 18),
+                    label: Text(l10n.resetPositions),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              PositionCanvas(
+                frameWidth: previewPreset.width,
+                frameHeight: previewPreset.height,
+                items: [
+                  PositionableItem(
+                    id: 'cover',
+                    label: l10n.elementCover,
+                    icon: Icons.image_outlined,
+                    color: Colors.blueAccent,
+                    transform: draft.coverTransform,
+                    enabled: draft.showCover,
+                    supportsRotation: false,
+                  ),
+                  PositionableItem(
+                    id: 'logo',
+                    label: l10n.elementLogo,
+                    icon: Icons.branding_watermark_outlined,
+                    color: Colors.deepPurpleAccent,
+                    transform: draft.logoTransform,
+                    enabled: draft.showLogo,
+                  ),
+                  PositionableItem(
+                    id: 'text',
+                    label: l10n.elementText,
+                    icon: Icons.text_fields,
+                    color: Colors.orangeAccent,
+                    transform: draft.textTransform,
+                    enabled: draft.showText,
+                    supportsRotation: false,
+                  ),
+                  PositionableItem(
+                    id: 'qr',
+                    label: l10n.elementQrCode,
+                    icon: Icons.qr_code,
+                    color: Colors.teal,
+                    transform: draft.qrTransform,
+                    enabled: draft.showQrCode,
+                  ),
+                ],
+                onChanged: (id, transform) {
+                  switch (id) {
+                    case 'cover':
+                      draftNotifier.setCoverTransform(transform);
+                      break;
+                    case 'logo':
+                      draftNotifier.setLogoTransform(transform);
+                      break;
+                    case 'text':
+                      draftNotifier.setTextTransform(transform);
+                      break;
+                    case 'qr':
+                      draftNotifier.setQrTransform(transform);
+                      break;
+                  }
+                },
+              ),
+            ],
+          ),
         ),
-      ),
-      if (draft.releaseMode == ReleaseMode.single)
+      if (_advancedMode && draft.releaseMode == ReleaseMode.single)
         (
           l10n.stepDuration,
           Column(
@@ -456,26 +495,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onToggle: draftNotifier.togglePreset,
         ),
       ),
-      (
-        l10n.stepOutputPerformance,
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            OutputDirectoryPicker(
-              selectedPath: draft.outputDirectory,
-              onDirectorySelected: draftNotifier.setOutputDirectory,
-            ),
-            const SizedBox(height: 16),
-            PerformancePanel(
-              useHardwareAcceleration: draft.useHardwareAcceleration,
-              onHardwareAccelerationChanged:
-                  draftNotifier.setUseHardwareAcceleration,
-              losslessAudio: draft.losslessAudio,
-              onLosslessAudioChanged: draftNotifier.setLosslessAudio,
-            ),
-          ],
+      if (_advancedMode)
+        (
+          l10n.stepOutputPerformance,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              OutputDirectoryPicker(
+                selectedPath: draft.outputDirectory,
+                onDirectorySelected: draftNotifier.setOutputDirectory,
+              ),
+              const SizedBox(height: 16),
+              PerformancePanel(
+                useHardwareAcceleration: draft.useHardwareAcceleration,
+                onHardwareAccelerationChanged:
+                    draftNotifier.setUseHardwareAcceleration,
+                losslessAudio: draft.losslessAudio,
+                onLosslessAudioChanged: draftNotifier.setLosslessAudio,
+              ),
+            ],
+          ),
         ),
-      ),
       (
         l10n.stepReviewRender,
         Column(
@@ -500,18 +540,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               label: l10n.stepVisualizer,
               value:
                   '${draft.placement.label(l10n)} · ${draft.style.label(l10n)}',
-              onEdit: () => _goTo(stepVisualizerIndex),
+              onEdit: () => stepVisualizerIndex != null
+                  ? _goTo(stepVisualizerIndex)
+                  : _enableAdvancedAndGoTo(advancedVisualizerIndex),
             ),
             ReviewSummaryRow(
               label: l10n.stepCustomize,
               value: _customizeSummary(l10n, draft),
-              onEdit: () => _goTo(stepCustomizeIndex),
+              onEdit: () => stepCustomizeIndex != null
+                  ? _goTo(stepCustomizeIndex)
+                  : _enableAdvancedAndGoTo(advancedCustomizeIndex),
             ),
-            if (stepDurationIndex != null)
+            if (hasDurationStep)
               ReviewSummaryRow(
                 label: l10n.stepDuration,
                 value: _durationSummary(l10n, draft),
-                onEdit: () => _goTo(stepDurationIndex),
+                onEdit: () => stepDurationIndex != null
+                    ? _goTo(stepDurationIndex)
+                    : _enableAdvancedAndGoTo(advancedDurationIndex!),
               ),
             ReviewSummaryRow(
               label: l10n.stepPlatforms,
@@ -521,7 +567,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ReviewSummaryRow(
               label: l10n.stepOutputPerformance,
               value: _outputSummary(l10n, draft),
-              onEdit: () => _goTo(stepOutputIndex),
+              onEdit: () => stepOutputIndex != null
+                  ? _goTo(stepOutputIndex)
+                  : _enableAdvancedAndGoTo(advancedOutputIndex),
             ),
             const SizedBox(height: 16),
             const Divider(),

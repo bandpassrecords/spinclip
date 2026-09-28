@@ -350,6 +350,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'A cover image and audio are required to continue.';
 
   @override
+  String get advancedModeLabel => 'Advanced settings';
+
+  @override
+  String get advancedModeSubtitle =>
+      'Fine-tune the visualizer, overlays, timing, and export options. Off uses sensible defaults for all of it.';
+
+  @override
   String get trackDefaultCoverHint => 'Uses the default cover';
 
   @override

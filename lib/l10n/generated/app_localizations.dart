@@ -699,6 +699,18 @@ abstract class AppLocalizations {
   /// **'A cover image and audio are required to continue.'**
   String get filesStepRequiredHint;
 
+  /// No description provided for @advancedModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced settings'**
+  String get advancedModeLabel;
+
+  /// No description provided for @advancedModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine-tune the visualizer, overlays, timing, and export options. Off uses sensible defaults for all of it.'**
+  String get advancedModeSubtitle;
+
   /// No description provided for @trackDefaultCoverHint.
   ///
   /// In en, this message translates to:

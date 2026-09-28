@@ -352,6 +352,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'É necessário selecionar uma imagem de capa e um áudio para continuar.';
 
   @override
+  String get advancedModeLabel => 'Configurações avançadas';
+
+  @override
+  String get advancedModeSubtitle =>
+      'Ajuste o visualizador, as sobreposições, o tempo e as opções de exportação. Desativado usa padrões adequados para tudo isso.';
+
+  @override
   String get trackDefaultCoverHint => 'Usa a capa padrão';
 
   @override
