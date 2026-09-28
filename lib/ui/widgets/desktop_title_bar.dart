@@ -2,7 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
+
+import '../../l10n/generated/app_localizations.dart';
+import '../../state/providers.dart';
 
 /// Icon for the maximize/restore window-control button: a single square
 /// when the window can still be maximized, two overlapping squares once it
@@ -16,26 +20,28 @@ IconData windowMaximizeToggleIcon(bool isMaximized) =>
 /// consistent with the rest of the app rather than mixing a native chrome
 /// bar with Flutter content below it.
 ///
-/// **Windows / Linux:** A draggable bar with the app title and native-style
-/// window control buttons (minimize / maximize / close).
+/// **Windows / Linux:** A draggable bar with the app title, a language
+/// switcher, and native-style window control buttons (minimize / maximize /
+/// close).
 ///
 /// **macOS:** `TitleBarStyle.hidden` + fullSizeContentView already makes
 /// Flutter content fill the entire window with the traffic-light buttons
-/// floating over it (drag/double-click-to-zoom handled natively in
-/// MainFlutterWindow.swift) - this just reserves 28pt at the top so content
-/// doesn't slide under those buttons.
+/// floating over the top-left (drag/double-click-to-zoom handled natively in
+/// MainFlutterWindow.swift) - this reserves 28pt at the top, with the
+/// language switcher right-aligned clear of those buttons.
 ///
 /// **Mobile/web:** Returns an empty widget.
-class DesktopTitleBar extends StatefulWidget {
+class DesktopTitleBar extends ConsumerStatefulWidget {
   final String title;
 
   const DesktopTitleBar({super.key, required this.title});
 
   @override
-  State<DesktopTitleBar> createState() => _DesktopTitleBarState();
+  ConsumerState<DesktopTitleBar> createState() => _DesktopTitleBarState();
 }
 
-class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
+class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
+    with WindowListener {
   // Manual double-tap detection for the drag area - avoids placing a
   // DoubleTapGestureRecognizer over the entire bar (which would delay the
   // window-control buttons by the double-tap timeout).
@@ -103,9 +109,20 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
     // starts at y=0, with the traffic lights floating over the top-left area.
     // Drag and double-click-to-maximize are handled natively in
     // MainFlutterWindow.swift via NSEvent monitors - no Flutter gesture
-    // detection needed here.
+    // detection needed here. The language switcher sits on the right, clear
+    // of the traffic lights.
     if (Platform.isMacOS) {
-      return const SizedBox(height: 28, width: double.infinity);
+      return const SizedBox(
+        height: 28,
+        width: double.infinity,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: EdgeInsets.only(right: 8),
+            child: _LanguageSwitcher(),
+          ),
+        ),
+      );
     }
 
     // Windows / Linux: full custom title bar.
@@ -145,13 +162,52 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
               ),
             ),
           ),
-          // Window controls: completely outside the drag-area detector.
+          // Language switcher + window controls: completely outside the
+          // drag-area detector.
+          const _LanguageSwitcher(),
           _WindowControlButtons(
             isMaximized: _isMaximized,
             onToggleMaximize: _toggleMaximize,
           ),
         ],
       ),
+    );
+  }
+}
+
+/// A globe icon that opens a menu of the app's supported languages, plus a
+/// "follow system" option. Picking one sets `localeProvider`, which
+/// `SpinclipApp` feeds straight into `MaterialApp.locale`.
+class _LanguageSwitcher extends ConsumerWidget {
+  const _LanguageSwitcher();
+
+  static const _labels = {'en': 'English', 'pt': 'Português', 'es': 'Español'};
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentLocale = ref.watch(localeProvider);
+    final color = Theme.of(context).textTheme.bodyMedium?.color;
+    return PopupMenuButton<Locale?>(
+      icon: Icon(Icons.language, size: 18, color: color),
+      tooltip: '',
+      onSelected: (locale) =>
+          ref.read(localeProvider.notifier).setLocale(locale),
+      itemBuilder: (context) => [
+        CheckedPopupMenuItem<Locale?>(
+          value: null,
+          checked: currentLocale == null,
+          child: const Text('System'),
+        ),
+        const PopupMenuDivider(),
+        for (final supported in AppLocalizations.supportedLocales)
+          CheckedPopupMenuItem<Locale?>(
+            value: supported,
+            checked: currentLocale?.languageCode == supported.languageCode,
+            child: Text(
+              _labels[supported.languageCode] ?? supported.languageCode,
+            ),
+          ),
+      ],
     );
   }
 }

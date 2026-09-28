@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' show Locale;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -739,3 +740,16 @@ final previewServiceProvider = Provider<PreviewService>((ref) {
     audioProbe: AudioProbeService(locator),
   );
 });
+
+/// The user's manually chosen UI language, or null to follow the system
+/// locale (MaterialApp's default behavior).
+class LocaleNotifier extends Notifier<Locale?> {
+  @override
+  Locale? build() => null;
+
+  void setLocale(Locale? locale) => state = locale;
+}
+
+final localeProvider = NotifierProvider<LocaleNotifier, Locale?>(
+  LocaleNotifier.new,
+);
