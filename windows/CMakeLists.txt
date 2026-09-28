@@ -106,3 +106,21 @@ install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
+
+# Bundled ffmpeg/ffprobe - Spinclip's entire rendering pipeline shells out to
+# these (see FiltergraphBuilder/AudioProbeService), so end users never need
+# to install anything themselves.
+#
+# Installed here rather than declared under `flutter: assets:` in pubspec.yaml
+# because that list has no per-platform filter and would ship this ~200 MB
+# Windows-only pair inside the macOS/Linux bundles too, where they can't run.
+#
+# Lands in <bundle>/tools/ next to the .exe; keep in sync with
+# FfmpegLocator.resolve(). See resources/tools/README.md for provenance,
+# version, and how to update these binaries.
+install(FILES
+  "${CMAKE_CURRENT_SOURCE_DIR}/../resources/tools/ffmpeg.exe"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../resources/tools/ffprobe.exe"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../resources/tools/FFMPEG_LICENSE.txt"
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/tools"
+  COMPONENT Runtime)

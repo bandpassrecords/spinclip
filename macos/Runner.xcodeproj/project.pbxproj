@@ -209,6 +209,7 @@
 				33CC10EB2044A3C60003C045 /* Resources */,
 				33CC110E2044A8840003C045 /* Bundle Framework */,
 				3399D490228B24CF009A79C7 /* ShellScript */,
+				AA11BB22CC33DD44EE55FF01 /* Copy Bundled ffmpeg */,
 			);
 			buildRules = (
 			);
@@ -328,6 +329,25 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh && touch Flutter/ephemeral/tripwire";
+		};
+		AA11BB22CC33DD44EE55FF01 /* Copy Bundled ffmpeg */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../resources/tools/ffmpeg",
+				"$(SRCROOT)/../resources/tools/ffprobe",
+				"$(SRCROOT)/../resources/tools/FFMPEG_LICENSE.txt",
+			);
+			name = "Copy Bundled ffmpeg";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(EXECUTABLE_FOLDER_PATH)/tools/ffmpeg",
+				"$(BUILT_PRODUCTS_DIR)/$(EXECUTABLE_FOLDER_PATH)/tools/ffprobe",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Spinclip's entire rendering pipeline shells out to ffmpeg/ffprobe (see\n# FiltergraphBuilder/AudioProbeService), so end users never need to install\n# anything themselves. See resources/tools/README.md for provenance/version.\n#\n# Lands in <App>.app/Contents/MacOS/tools/ next to the executable; keep in\n# sync with FfmpegLocator.resolve().\nTOOLS_DIR=\"${BUILT_PRODUCTS_DIR}/${EXECUTABLE_FOLDER_PATH}/tools\"\nmkdir -p \"${TOOLS_DIR}\"\ncp \"${SRCROOT}/../resources/tools/ffmpeg\" \"${TOOLS_DIR}/ffmpeg\"\ncp \"${SRCROOT}/../resources/tools/ffprobe\" \"${TOOLS_DIR}/ffprobe\"\ncp \"${SRCROOT}/../resources/tools/FFMPEG_LICENSE.txt\" \"${TOOLS_DIR}/FFMPEG_LICENSE.txt\"\nchmod +x \"${TOOLS_DIR}/ffmpeg\" \"${TOOLS_DIR}/ffprobe\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
