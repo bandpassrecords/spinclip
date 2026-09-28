@@ -15,7 +15,11 @@ at runtime (`<bundle>/tools/ffmpeg[.exe]` next to the app's own executable).
   `<bundle>/tools/`.
 - macOS: a "Copy Bundled ffmpeg" Run Script build phase on the Runner target
   (see `macos/Runner.xcodeproj/project.pbxproj`), copying `ffmpeg`/`ffprobe`
-  from this folder into `<App>.app/Contents/MacOS/tools/`.
+  from this folder into `<App>.app/Contents/MacOS/tools/`, and
+  `FFMPEG_LICENSE.txt` into `<App>.app/Contents/Resources/` instead - NOT
+  alongside the binaries. codesign (even ad-hoc/unsigned) walks
+  `Contents/MacOS/` expecting only executables, and fails the whole app's
+  signature on finding a plain text file there.
 
 Listing them under `flutter: assets:` in `pubspec.yaml` would ship them
 inside every platform's bundle indiscriminately (Android, iOS, web too),
