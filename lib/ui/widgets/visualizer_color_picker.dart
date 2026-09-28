@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/generated/app_localizations.dart';
 import '../../services/palette_extractor_service.dart';
+import '../../util/color_hex.dart';
 
 /// Lets the user pick the visualizer's bar/wave color from a small preset
 /// palette, or derive one automatically from the cover image ("Auto") or
@@ -52,11 +53,6 @@ class _VisualizerColorPickerState extends State<VisualizerColorPicker> {
     widget.onColorChanged(hex);
   }
 
-  Color _parseColor(String hex) {
-    final clean = hex.replaceFirst('0x', '').padLeft(6, '0');
-    return Color(int.parse('FF$clean', radix: 16));
-  }
-
   bool _isSelected(String hex) =>
       widget.colorHex.toUpperCase() == hex.toUpperCase();
 
@@ -78,7 +74,7 @@ class _VisualizerColorPickerState extends State<VisualizerColorPicker> {
           children: [
             for (final hex in _swatches)
               _ColorSwatch(
-                color: _parseColor(hex),
+                color: colorFromHex(hex),
                 selected: _isSelected(hex),
                 onTap: () => widget.onColorChanged(hex),
               ),

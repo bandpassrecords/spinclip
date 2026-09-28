@@ -22,6 +22,7 @@ class AudioPreviewPlayer extends ConsumerStatefulWidget {
   final double startSeconds;
   final double? endSeconds;
   final double totalDurationSeconds;
+  final Color waveColor;
 
   const AudioPreviewPlayer({
     super.key,
@@ -29,6 +30,7 @@ class AudioPreviewPlayer extends ConsumerStatefulWidget {
     required this.startSeconds,
     required this.endSeconds,
     required this.totalDurationSeconds,
+    this.waveColor = const Color(0xFF33CCFF),
   });
 
   @override
@@ -44,6 +46,11 @@ class _AudioPreviewPlayerState extends ConsumerState<AudioPreviewPlayer> {
   StreamSubscription<Duration>? _positionSub;
   StreamSubscription<void>? _completeSub;
 
+  // Whether `_player` has ever had a source loaded (via play()). Calling
+  // seek() before that hangs forever - it waits on a native "seek complete"
+  // event that never fires without a source loaded on the platform side.
+  bool _sourceLoaded = false;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +64,7 @@ class _AudioPreviewPlayerState extends ConsumerState<AudioPreviewPlayer> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.audioPath != widget.audioPath) {
       _stopAndRewind();
+      _sourceLoaded = false;
       _peaks = null;
       _loadPeaks();
     }
@@ -89,10 +97,12 @@ class _AudioPreviewPlayerState extends ConsumerState<AudioPreviewPlayer> {
   }
 
   Future<void> _stopAndRewind() async {
-    await _player.pause();
-    await _player.seek(
-      Duration(milliseconds: (widget.startSeconds * 1000).round()),
-    );
+    if (_sourceLoaded) {
+      await _player.pause();
+      await _player.seek(
+        Duration(milliseconds: (widget.startSeconds * 1000).round()),
+      );
+    }
     if (!mounted) return;
     setState(() {
       _isPlaying = false;
@@ -112,15 +122,31 @@ class _AudioPreviewPlayerState extends ConsumerState<AudioPreviewPlayer> {
     final endMs = widget.endSeconds != null
         ? (widget.endSeconds! * 1000).round()
         : null;
-    if (_position.inMilliseconds < startMs ||
-        (endMs != null && _position.inMilliseconds >= endMs)) {
-      await _player.seek(Duration(milliseconds: startMs));
+    final needsRestart =
+        _position.inMilliseconds < startMs ||
+        (endMs != null && _position.inMilliseconds >= endMs);
+
+    if (!_sourceLoaded) {
+      // First playback: play()'s own setSource -> seek -> resume sequencing
+      // avoids calling seek() before a source is loaded on the platform
+      // side, which otherwise hangs forever waiting for a "seek complete"
+      // event that never fires.
+      await _player.play(
+        DeviceFileSource(widget.audioPath),
+        position: Duration(milliseconds: startMs),
+      );
+      _sourceLoaded = true;
+    } else {
+      if (needsRestart) {
+        await _player.seek(Duration(milliseconds: startMs));
+      }
+      await _player.resume();
     }
-    await _player.play(DeviceFileSource(widget.audioPath));
     setState(() => _isPlaying = true);
   }
 
   void _seekToFraction(double fraction) {
+    if (!_sourceLoaded) return; // nothing loaded yet to seek within
     final target = fraction.clamp(0.0, 1.0) * widget.totalDurationSeconds;
     _player.seek(Duration(milliseconds: (target * 1000).round()));
   }
@@ -164,6 +190,9 @@ class _AudioPreviewPlayerState extends ConsumerState<AudioPreviewPlayer> {
                       selectionStartFraction: startFraction,
                       selectionEndFraction: endFraction,
                       playheadFraction: _isPlaying ? playheadFraction : null,
+                      barColor: widget.waveColor,
+                      selectionOverlayColor: widget.waveColor.withAlpha(0x22),
+                      playheadColor: widget.waveColor,
                     ),
                   ),
                 ),

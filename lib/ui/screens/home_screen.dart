@@ -10,6 +10,7 @@ import '../../models/render_settings.dart';
 import '../../models/visualizer_placement.dart';
 import '../../models/visualizer_style.dart';
 import '../../state/providers.dart';
+import '../../util/color_hex.dart';
 import '../widgets/audio_preview_player.dart';
 import '../widgets/audio_trim_slider.dart';
 import '../widgets/customization_panel.dart';
@@ -442,6 +443,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ? draft.trimStartSeconds + draft.trimDurationSeconds!
                       : null,
                   totalDurationSeconds: draft.probedAudioDurationSeconds!,
+                  waveColor: colorFromHex(draft.visualizerColorHex),
                 ),
               ],
             ],
