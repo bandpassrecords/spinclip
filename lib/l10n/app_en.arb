@@ -39,6 +39,7 @@
   "audioFileLabel": "Audio file (WAV/MP3/FLAC...)",
   "medleyExplanation": "Each song contributes a short excerpt; they play back to back as one combined video per platform.",
   "multiSongExplanation": "Each song renders its own independent output video, for every selected platform.",
+  "singleExplanation": "One cover and one song produce a single video, for every selected platform.",
 
   "positionAndRotate": "Position & rotate",
   "positionCanvasHint": "Drag to position. Tap an element to adjust its rotation.",

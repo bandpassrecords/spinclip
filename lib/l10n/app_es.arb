@@ -26,6 +26,7 @@
   "audioFileLabel": "Archivo de audio (WAV/MP3/FLAC...)",
   "medleyExplanation": "Cada canción aporta un fragmento corto; se reproducen en secuencia como un único vídeo combinado por plataforma.",
   "multiSongExplanation": "Cada canción genera su propio vídeo independiente, para cada plataforma seleccionada.",
+  "singleExplanation": "Una portada y una canción producen un solo vídeo, para cada plataforma seleccionada.",
 
   "positionAndRotate": "Posición y rotación",
   "positionCanvasHint": "Arrastra para posicionar. Toca un elemento para ajustar su rotación.",

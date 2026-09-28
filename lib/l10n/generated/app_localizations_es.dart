@@ -82,6 +82,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Cada canción genera su propio vídeo independiente, para cada plataforma seleccionada.';
 
   @override
+  String get singleExplanation =>
+      'Una portada y una canción producen un solo vídeo, para cada plataforma seleccionada.';
+
+  @override
   String get positionAndRotate => 'Posición y rotación';
 
   @override

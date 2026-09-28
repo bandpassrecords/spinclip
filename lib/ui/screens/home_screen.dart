@@ -16,14 +16,15 @@ import '../widgets/audio_trim_slider.dart';
 import '../widgets/customization_panel.dart';
 import '../widgets/desktop_title_bar.dart';
 import '../widgets/file_drop_target.dart';
-import '../widgets/load_template_button.dart';
 import '../widgets/output_directory_picker.dart';
 import '../widgets/performance_panel.dart';
 import '../widgets/platform_preset_picker.dart';
 import '../widgets/position_canvas.dart';
 import '../widgets/preview_panel.dart';
+import '../widgets/release_mode_picker.dart';
 import '../widgets/render_progress_view.dart';
 import '../widgets/review_summary_row.dart';
+import '../widgets/template_combo_box.dart';
 import '../widgets/track_list_editor.dart';
 import '../widgets/visualizer_placement_picker.dart';
 import '../widgets/visualizer_style_picker.dart';
@@ -232,29 +233,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LoadTemplateButton(
+            TemplateComboBox(
               templates: templates,
               onApply: draftNotifier.applyTemplate,
               onDelete: templatesNotifier.delete,
             ),
             const SizedBox(height: 16),
-            SegmentedButton<ReleaseMode>(
-              segments: [
-                ButtonSegment(
-                  value: ReleaseMode.single,
-                  label: Text(l10n.releaseModeSingle),
-                ),
-                ButtonSegment(
-                  value: ReleaseMode.multiSong,
-                  label: Text(l10n.releaseModeMultiSong),
-                ),
-                ButtonSegment(
-                  value: ReleaseMode.medley,
-                  label: Text(l10n.releaseModeMedley),
-                ),
-              ],
-              selected: {draft.releaseMode},
-              onSelectionChanged: (s) => draftNotifier.setReleaseMode(s.first),
+            ReleaseModePicker(
+              value: draft.releaseMode,
+              onChanged: draftNotifier.setReleaseMode,
             ),
             const SizedBox(height: 16),
             SwitchListTile(

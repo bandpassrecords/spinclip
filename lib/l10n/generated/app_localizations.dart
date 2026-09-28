@@ -232,6 +232,12 @@ abstract class AppLocalizations {
   /// **'Each song renders its own independent output video, for every selected platform.'**
   String get multiSongExplanation;
 
+  /// No description provided for @singleExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'One cover and one song produce a single video, for every selected platform.'**
+  String get singleExplanation;
+
   /// No description provided for @positionAndRotate.
   ///
   /// In en, this message translates to:
