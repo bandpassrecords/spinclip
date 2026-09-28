@@ -13,16 +13,28 @@ CI enforces this — a tag push fails immediately if `CHANGELOG.md` has no match
    workflow attaches build artifacts to an *existing* release, it does not create one.
 4. Push the tag (if not already pushed with `--push`). `.github/workflows/release.yml` then:
    - Verifies `CHANGELOG.md` matches the tag and runs `flutter analyze` + `flutter test`.
-   - Builds an unsigned Windows zip, an unsigned macOS zip, and a Linux tarball, each with a
-     `.sha256` checksum, and attaches them to the release.
+   - Builds an unsigned Windows zip + unsigned Windows MSIX, an unsigned macOS zip, and a Linux
+     tarball, each with a `.sha256` checksum, and attaches them to the release.
 
 Every pull request against `main` also runs the test suite and a Windows build check
 (`test_pr_build`), independent of tagging.
 
+## ffmpeg is bundled, not a user prerequisite
+
+Spinclip's entire rendering pipeline shells out to ffmpeg/ffprobe, so both are committed to the
+repo under `resources/tools/` (see `resources/tools/README.md` for provenance/versions/how to
+update) and bundled into every build automatically — `windows/CMakeLists.txt`'s `install(FILES
+...)` for Windows, a "Copy Bundled ffmpeg" Run Script build phase on the macOS Runner target.
+`FfmpegLocator.resolve()` picks up the bundled copy first, falling back to `FFMPEG_PATH`/`PATH`
+only if it's missing (e.g. running from source without a full `flutter build`). End users never
+need to install ffmpeg themselves.
+
 ## Not set up yet
 
-No secrets are required today. Windows/Linux installer packaging (MSIX, Inno Setup, AppImage,
-Flatpak), macOS code signing/notarization, and Windows code signing aren't wired up — today's
-release artifacts are plain, unsigned zip/tarball bundles of the Flutter build output. macOS will
-show an "unidentified developer" warning on first launch as a result. Revisit signing if/when this
-ships to the App Store or otherwise needs a smoother first-run experience.
+No secrets are required today. The Windows MSIX is unsigned (`store: true` in `msix_config` defers
+signing to the Store rather than generating a local certificate) — installable via `Add-AppxPackage`
+for sideload testing, but a real Store submission needs the BandPass Records Partner Center
+`publisher` CN in `pubspec.yaml` double-checked first. Linux installer packaging (AppImage/Flatpak),
+macOS code signing/notarization, and Windows code signing beyond the MSIX itself aren't wired up —
+macOS will show an "unidentified developer" warning on first launch as a result. Revisit signing
+if/when this ships to the App Store or otherwise needs a smoother first-run experience.

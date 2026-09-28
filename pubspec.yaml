@@ -59,6 +59,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  msix: ^3.18.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -105,3 +106,21 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Builds a Windows MSIX package: `dart run msix:create`. Same shape as the
+# daw-project-manager sibling project's config; `publisher` is the BandPass
+# Records Partner Center account identity (shared across that account's
+# apps, not per-app), so it's reused as-is - double check it in Partner
+# Center before the first real submission. `store: true` defers signing to
+# the Store rather than generating a local self-signed certificate, which
+# matches this project's "no secrets committed" release setup.
+msix_config:
+  display_name: Spinclip
+  publisher_display_name: BandPass Records
+  identity_name: BandPassRecords.Spinclip
+  msix_version: 0.1.0.0
+  logo_path: windows/msix_logo.png
+  capabilities: "internetClient"
+  install_certificate: false
+  publisher: "CN=346F9F1A-9A2E-45E9-81C1-27476C725076"
+  store: true

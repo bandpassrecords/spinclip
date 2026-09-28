@@ -87,12 +87,14 @@ jobs:
           path: build/windows/x64/runner/Release/
           retention-days: 7
 
-  # Windows + macOS release builds, tag-triggered only. Ships as a plain,
-  # unsigned zip of the Flutter release bundle - no installer/MSIX packaging
-  # and no macOS code signing/notarization (neither needs any repo secrets
-  # today). macOS will show an "unidentified developer" warning on first
-  # launch until signing is added - revisit if/when this ships to the App
-  # Store or otherwise needs a smoother first-run experience.
+  # Windows + macOS release builds, tag-triggered only. Windows ships both a
+  # plain zip of the Flutter release bundle and an unsigned MSIX package
+  # (msix_config in pubspec.yaml, `store: true` defers signing to the Store);
+  # macOS ships a plain zip only, with no code signing/notarization (neither
+  # needs any repo secrets today). macOS will show an "unidentified
+  # developer" warning on first launch until signing is added - revisit
+  # if/when this ships to the App Store or otherwise needs a smoother
+  # first-run experience.
   release_build_upload:
     name: Build & Upload (${{ matrix.os_name }})
     needs: unit_tests
@@ -152,6 +154,26 @@ jobs:
           $hash = (Get-FileHash $zipName -Algorithm SHA256).Hash.ToLower()
           "$hash  $zipName" | Out-File -Encoding ascii "$zipName.sha256"
 
+      # Built from the same already-built Release dir as the zip above
+      # (--build-windows false skips redoing `flutter build windows`), so it
+      # picks up the same bundled ffmpeg/ffprobe. Unsigned - see
+      # msix_config's `store: true` in pubspec.yaml - installable via
+      # `Add-AppxPackage` for sideload testing, or through the Store once
+      # submitted there.
+      - name: Build MSIX package
+        if: matrix.os_name == 'Windows'
+        shell: bash
+        run: dart run msix:create --version ${{ steps.build_version.outputs.version_name }}.0 --build-windows false
+
+      - name: Rename and checksum MSIX package
+        if: matrix.os_name == 'Windows'
+        shell: pwsh
+        run: |
+          $msixName = "Spinclip_Windows_${{ github.ref_name }}.msix"
+          Move-Item "${{ matrix.build_dir }}\spinclip.msix" $msixName
+          $hash = (Get-FileHash $msixName -Algorithm SHA256).Hash.ToLower()
+          "$hash  $msixName" | Out-File -Encoding ascii "$msixName.sha256"
+
       - name: Generate SHA256 checksum (macOS)
         if: matrix.os_name == 'macOS'
         run: |
@@ -196,6 +218,28 @@ jobs:
           upload_url: ${{ steps.find_release.outputs.upload_url }}
           asset_path: Spinclip_${{ matrix.os_name }}_${{ github.ref_name }}.zip.sha256
           asset_name: Spinclip_${{ matrix.os_name }}_${{ github.ref_name }}.zip.sha256
+          asset_content_type: text/plain
+
+      - name: Upload Windows MSIX Package
+        if: matrix.os_name == 'Windows' && steps.find_release.outputs.upload_url != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.find_release.outputs.upload_url }}
+          asset_path: Spinclip_Windows_${{ github.ref_name }}.msix
+          asset_name: Spinclip_Windows_${{ github.ref_name }}.msix
+          asset_content_type: application/msix
+
+      - name: Upload Windows MSIX SHA256 Checksum
+        if: matrix.os_name == 'Windows' && steps.find_release.outputs.upload_url != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.find_release.outputs.upload_url }}
+          asset_path: Spinclip_Windows_${{ github.ref_name }}.msix.sha256
+          asset_name: Spinclip_Windows_${{ github.ref_name }}.msix.sha256
           asset_content_type: text/plain
 
   # Plain tarball of the Flutter Linux bundle - a normal `flutter build linux`
