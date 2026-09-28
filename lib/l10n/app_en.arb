@@ -183,6 +183,11 @@
   "advancedModeLabel": "Advanced settings",
   "advancedModeSubtitle": "Fine-tune the visualizer, overlays, timing, and export options. Off uses sensible defaults for all of it.",
 
+  "customResolutionTitle": "Custom resolution",
+  "resolutionWidthLabel": "Width",
+  "resolutionHeightLabel": "Height",
+  "resetResolutionTooltip": "Reset to default resolution",
+
   "trackDefaultCoverHint": "Uses the default cover",
   "trackSetCover": "Set cover",
   "trackClearCoverTooltip": "Remove custom cover",

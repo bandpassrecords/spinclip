@@ -122,6 +122,11 @@
   "advancedModeLabel": "Ajustes avanzados",
   "advancedModeSubtitle": "Ajusta el visualizador, las superposiciones, el tiempo y las opciones de exportación. Desactivado usa valores predeterminados razonables para todo esto.",
 
+  "customResolutionTitle": "Resolución personalizada",
+  "resolutionWidthLabel": "Ancho",
+  "resolutionHeightLabel": "Alto",
+  "resetResolutionTooltip": "Restablecer resolución predeterminada",
+
   "trackDefaultCoverHint": "Usa la portada predeterminada",
   "trackSetCover": "Definir portada",
   "trackClearCoverTooltip": "Quitar portada personalizada",

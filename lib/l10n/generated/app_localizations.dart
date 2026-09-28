@@ -717,6 +717,30 @@ abstract class AppLocalizations {
   /// **'Fine-tune the visualizer, overlays, timing, and export options. Off uses sensible defaults for all of it.'**
   String get advancedModeSubtitle;
 
+  /// No description provided for @customResolutionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom resolution'**
+  String get customResolutionTitle;
+
+  /// No description provided for @resolutionWidthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Width'**
+  String get resolutionWidthLabel;
+
+  /// No description provided for @resolutionHeightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Height'**
+  String get resolutionHeightLabel;
+
+  /// No description provided for @resetResolutionTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to default resolution'**
+  String get resetResolutionTooltip;
+
   /// No description provided for @trackDefaultCoverHint.
   ///
   /// In en, this message translates to:

@@ -122,6 +122,11 @@
   "advancedModeLabel": "Configurações avançadas",
   "advancedModeSubtitle": "Ajuste o visualizador, as sobreposições, o tempo e as opções de exportação. Desativado usa padrões adequados para tudo isso.",
 
+  "customResolutionTitle": "Resolução personalizada",
+  "resolutionWidthLabel": "Largura",
+  "resolutionHeightLabel": "Altura",
+  "resetResolutionTooltip": "Restaurar resolução padrão",
+
   "trackDefaultCoverHint": "Usa a capa padrão",
   "trackSetCover": "Definir capa",
   "trackClearCoverTooltip": "Remover capa personalizada",

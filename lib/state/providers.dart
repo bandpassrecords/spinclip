@@ -63,6 +63,10 @@ class DraftSettings {
   final double trimStartSeconds;
   final double? trimDurationSeconds;
   final Set<String> selectedPresetIds;
+
+  /// Per-preset (width, height) overrides, keyed by PlatformPreset.id -
+  /// absent presets render at their built-in default resolution.
+  final Map<String, (int, int)> resolutionOverrides;
   final String? outputDirectory;
   final bool useHardwareAcceleration;
   final bool losslessAudio;
@@ -100,6 +104,7 @@ class DraftSettings {
     this.trimStartSeconds = 0,
     this.trimDurationSeconds,
     this.selectedPresetIds = const {'youtube'},
+    this.resolutionOverrides = const {},
     this.outputDirectory,
     this.useHardwareAcceleration = true,
     this.losslessAudio = true,
@@ -198,6 +203,12 @@ class DraftSettings {
 
   List<PlatformPreset> get selectedPresets => PlatformPreset.all
       .where((preset) => selectedPresetIds.contains(preset.id))
+      .map((preset) {
+        final override = resolutionOverrides[preset.id];
+        return override == null
+            ? preset
+            : preset.copyWith(width: override.$1, height: override.$2);
+      })
       .toList();
 
   DraftSettings copyWith({
@@ -232,6 +243,7 @@ class DraftSettings {
     double? trimStartSeconds,
     double? trimDurationSeconds,
     Set<String>? selectedPresetIds,
+    Map<String, (int, int)>? resolutionOverrides,
     String? outputDirectory,
     bool? useHardwareAcceleration,
     bool? losslessAudio,
@@ -271,6 +283,7 @@ class DraftSettings {
       trimStartSeconds: trimStartSeconds ?? this.trimStartSeconds,
       trimDurationSeconds: trimDurationSeconds ?? this.trimDurationSeconds,
       selectedPresetIds: selectedPresetIds ?? this.selectedPresetIds,
+      resolutionOverrides: resolutionOverrides ?? this.resolutionOverrides,
       outputDirectory: outputDirectory ?? this.outputDirectory,
       useHardwareAcceleration:
           useHardwareAcceleration ?? this.useHardwareAcceleration,
@@ -399,6 +412,19 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
     state = state.copyWith(selectedPresetIds: next);
   }
 
+  /// Sets a custom (width, height) for one platform preset, or clears it
+  /// (falling back to that preset's built-in default) when [resolution] is
+  /// null.
+  void setResolutionOverride(String presetId, (int, int)? resolution) {
+    final next = {...state.resolutionOverrides};
+    if (resolution == null) {
+      next.remove(presetId);
+    } else {
+      next[presetId] = resolution;
+    }
+    state = state.copyWith(resolutionOverrides: next);
+  }
+
   /// Snapshots everything about how the video looks and behaves - but not
   /// the actual cover image(s)/song(s)/output directory - so it can be
   /// reapplied to a different release later.
@@ -430,6 +456,7 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
       fullDuration: state.fullDuration,
       vintageEffect: state.vintageEffect,
       selectedPresetIds: state.selectedPresetIds,
+      resolutionOverrides: state.resolutionOverrides,
       useHardwareAcceleration: state.useHardwareAcceleration,
       losslessAudio: state.losslessAudio,
     );
@@ -465,6 +492,7 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
       fullDuration: template.fullDuration,
       vintageEffect: template.vintageEffect,
       selectedPresetIds: template.selectedPresetIds,
+      resolutionOverrides: template.resolutionOverrides,
       useHardwareAcceleration: template.useHardwareAcceleration,
       losslessAudio: template.losslessAudio,
     );

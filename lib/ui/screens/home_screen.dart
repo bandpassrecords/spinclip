@@ -480,6 +480,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         PlatformPresetPicker(
           selectedIds: draft.selectedPresetIds,
           onToggle: draftNotifier.togglePreset,
+          showResolutionOverrides: _advancedMode,
+          resolutionOverrides: draft.resolutionOverrides,
+          onResolutionChanged: draftNotifier.setResolutionOverride,
         ),
       ),
       if (_advancedMode)

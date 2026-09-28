@@ -361,6 +361,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Fine-tune the visualizer, overlays, timing, and export options. Off uses sensible defaults for all of it.';
 
   @override
+  String get customResolutionTitle => 'Custom resolution';
+
+  @override
+  String get resolutionWidthLabel => 'Width';
+
+  @override
+  String get resolutionHeightLabel => 'Height';
+
+  @override
+  String get resetResolutionTooltip => 'Reset to default resolution';
+
+  @override
   String get trackDefaultCoverHint => 'Uses the default cover';
 
   @override

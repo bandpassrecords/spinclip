@@ -26,6 +26,17 @@ class PlatformPreset {
 
   static int _gcd(int a, int b) => b == 0 ? a : _gcd(b, a % b);
 
+  PlatformPreset copyWith({int? width, int? height}) {
+    return PlatformPreset(
+      id: id,
+      name: name,
+      width: width ?? this.width,
+      height: height ?? this.height,
+      notes: notes,
+      fixedLoopSeconds: fixedLoopSeconds,
+    );
+  }
+
   static const instagramFeed = PlatformPreset(
     id: 'instagram_feed',
     name: 'Instagram Feed',

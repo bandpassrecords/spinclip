@@ -363,6 +363,18 @@ class AppLocalizationsPt extends AppLocalizations {
       'Ajuste o visualizador, as sobreposições, o tempo e as opções de exportação. Desativado usa padrões adequados para tudo isso.';
 
   @override
+  String get customResolutionTitle => 'Resolução personalizada';
+
+  @override
+  String get resolutionWidthLabel => 'Largura';
+
+  @override
+  String get resolutionHeightLabel => 'Altura';
+
+  @override
+  String get resetResolutionTooltip => 'Restaurar resolução padrão';
+
+  @override
   String get trackDefaultCoverHint => 'Usa a capa padrão';
 
   @override

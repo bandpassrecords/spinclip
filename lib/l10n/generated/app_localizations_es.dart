@@ -364,6 +364,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ajusta el visualizador, las superposiciones, el tiempo y las opciones de exportación. Desactivado usa valores predeterminados razonables para todo esto.';
 
   @override
+  String get customResolutionTitle => 'Resolución personalizada';
+
+  @override
+  String get resolutionWidthLabel => 'Ancho';
+
+  @override
+  String get resolutionHeightLabel => 'Alto';
+
+  @override
+  String get resetResolutionTooltip => 'Restablecer resolución predeterminada';
+
+  @override
   String get trackDefaultCoverHint => 'Usa la portada predeterminada';
 
   @override

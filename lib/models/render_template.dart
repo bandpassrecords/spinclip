@@ -42,6 +42,9 @@ class RenderTemplate {
 
   final bool vintageEffect;
   final Set<String> selectedPresetIds;
+
+  /// Per-preset (width, height) overrides, keyed by PlatformPreset.id.
+  final Map<String, (int, int)> resolutionOverrides;
   final bool useHardwareAcceleration;
   final bool losslessAudio;
 
@@ -72,6 +75,7 @@ class RenderTemplate {
     required this.fullDuration,
     required this.vintageEffect,
     required this.selectedPresetIds,
+    this.resolutionOverrides = const {},
     required this.useHardwareAcceleration,
     required this.losslessAudio,
   });
@@ -103,6 +107,9 @@ class RenderTemplate {
     'fullDuration': fullDuration,
     'vintageEffect': vintageEffect,
     'selectedPresetIds': selectedPresetIds.toList(),
+    'resolutionOverrides': resolutionOverrides.map(
+      (id, res) => MapEntry(id, {'width': res.$1, 'height': res.$2}),
+    ),
     'useHardwareAcceleration': useHardwareAcceleration,
     'losslessAudio': losslessAudio,
   };
@@ -125,6 +132,21 @@ class RenderTemplate {
           (json['rotationDegrees'] as num?)?.toDouble() ??
           fallback.rotationDegrees,
     );
+  }
+
+  static Map<String, (int, int)> _resolutionOverridesFromJson(Object? json) {
+    if (json is! Map) return const {};
+    final result = <String, (int, int)>{};
+    for (final entry in json.entries) {
+      final value = entry.value;
+      if (value is! Map) continue;
+      final width = (value['width'] as num?)?.toInt();
+      final height = (value['height'] as num?)?.toInt();
+      if (width != null && height != null) {
+        result[entry.key as String] = (width, height);
+      }
+    }
+    return result;
   }
 
   factory RenderTemplate.fromJson(Map<String, dynamic> json) {
@@ -180,6 +202,9 @@ class RenderTemplate {
           ((json['selectedPresetIds'] as List?)?.cast<String>() ??
                   const ['youtube'])
               .toSet(),
+      resolutionOverrides: _resolutionOverridesFromJson(
+        json['resolutionOverrides'],
+      ),
       useHardwareAcceleration: json['useHardwareAcceleration'] as bool? ?? true,
       losslessAudio: json['losslessAudio'] as bool? ?? true,
     );
