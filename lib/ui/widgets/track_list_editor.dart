@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
@@ -11,6 +13,10 @@ class TrackListEditor extends StatelessWidget {
   final List<Track> tracks;
   final bool isMedley;
   final double defaultSnippetDuration;
+
+  /// The release's shared cover image, shown as each track's thumbnail
+  /// unless that track sets its own.
+  final String? defaultImagePath;
   final ValueChanged<List<String>> onAddTracks;
   final void Function(int index) onRemoveTrack;
   final void Function(int index, Track track) onUpdateTrack;
@@ -20,6 +26,7 @@ class TrackListEditor extends StatelessWidget {
     required this.tracks,
     required this.isMedley,
     required this.defaultSnippetDuration,
+    required this.defaultImagePath,
     required this.onAddTracks,
     required this.onRemoveTrack,
     required this.onUpdateTrack,
@@ -44,6 +51,7 @@ class TrackListEditor extends StatelessWidget {
             index: i,
             track: tracks[i],
             isMedley: isMedley,
+            defaultImagePath: defaultImagePath,
             onRemove: () => onRemoveTrack(i),
             onUpdate: (t) => onUpdateTrack(i, t),
           ),
@@ -62,6 +70,7 @@ class _TrackRow extends StatelessWidget {
   final int index;
   final Track track;
   final bool isMedley;
+  final String? defaultImagePath;
   final VoidCallback onRemove;
   final ValueChanged<Track> onUpdate;
 
@@ -69,6 +78,7 @@ class _TrackRow extends StatelessWidget {
     required this.index,
     required this.track,
     required this.isMedley,
+    required this.defaultImagePath,
     required this.onRemove,
     required this.onUpdate,
   });
@@ -94,10 +104,52 @@ class _TrackRow extends StatelessWidget {
     );
   }
 
+  Widget _thumbnail(String? path) {
+    const size = 40.0;
+    if (path == null) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.black26,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Icon(
+          Icons.image_outlined,
+          size: 18,
+          color: Colors.white54,
+        ),
+      );
+    }
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: Image.file(
+        File(path),
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.black26,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Icon(
+            Icons.broken_image_outlined,
+            size: 18,
+            color: Colors.white54,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final name = p.basename(track.audioPath);
+    final effectiveImagePath = track.imagePath ?? defaultImagePath;
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
@@ -121,8 +173,8 @@ class _TrackRow extends StatelessWidget {
             ),
             Row(
               children: [
-                const Icon(Icons.image_outlined, size: 16),
-                const SizedBox(width: 6),
+                _thumbnail(effectiveImagePath),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     track.imagePath != null

@@ -15,6 +15,7 @@ import '../widgets/audio_trim_slider.dart';
 import '../widgets/customization_panel.dart';
 import '../widgets/desktop_title_bar.dart';
 import '../widgets/file_drop_target.dart';
+import '../widgets/load_template_button.dart';
 import '../widgets/output_directory_picker.dart';
 import '../widgets/performance_panel.dart';
 import '../widgets/platform_preset_picker.dart';
@@ -22,7 +23,6 @@ import '../widgets/position_canvas.dart';
 import '../widgets/preview_panel.dart';
 import '../widgets/render_progress_view.dart';
 import '../widgets/review_summary_row.dart';
-import '../widgets/template_controls.dart';
 import '../widgets/track_list_editor.dart';
 import '../widgets/visualizer_placement_picker.dart';
 import '../widgets/visualizer_style_picker.dart';
@@ -38,12 +38,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _pageController = PageController();
   int _currentStep = 0;
 
+  // "Save as template" on the Review & render step: a name typed here is
+  // captured as a template alongside starting the render, not immediately -
+  // so unchecking it or never pressing Render never saves anything.
+  bool _saveAsTemplate = false;
+  final _templateNameController = TextEditingController();
+
   static const _pageTransitionDuration = Duration(milliseconds: 320);
   static const _pageTransitionCurve = Curves.easeInOutCubic;
 
   @override
   void dispose() {
     _pageController.dispose();
+    _templateNameController.dispose();
     super.dispose();
   }
 
@@ -195,6 +202,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            LoadTemplateButton(
+              templates: templates,
+              onApply: draftNotifier.applyTemplate,
+              onDelete: templatesNotifier.delete,
+            ),
+            const SizedBox(height: 16),
             SegmentedButton<ReleaseMode>(
               segments: [
                 ButtonSegment(
@@ -261,6 +274,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 tracks: draft.tracks,
                 isMedley: draft.releaseMode == ReleaseMode.medley,
                 defaultSnippetDuration: draft.snippetDurationSeconds,
+                defaultImagePath: draft.imagePath,
                 onAddTracks: draftNotifier.addTracks,
                 onRemoveTrack: draftNotifier.removeTrackAt,
                 onUpdateTrack: draftNotifier.updateTrackAt,
@@ -291,14 +305,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TemplateControls(
-              templates: templates,
-              onApply: draftNotifier.applyTemplate,
-              onSaveAs: (name) =>
-                  templatesNotifier.save(draftNotifier.captureTemplate(name)),
-              onDelete: templatesNotifier.delete,
-            ),
-            const SizedBox(height: 16),
             CustomizationPanel(
               blurRadius: draft.blurRadius,
               onBlurChanged: draftNotifier.setBlurRadius,
@@ -517,7 +523,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             const SizedBox(height: 16),
             const Divider(),
-            const SizedBox(height: 16),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: _saveAsTemplate,
+              onChanged: (v) => setState(() => _saveAsTemplate = v ?? false),
+              title: Text(l10n.saveAsTemplateButton),
+            ),
+            if (_saveAsTemplate)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: TextField(
+                  controller: _templateNameController,
+                  decoration: InputDecoration(
+                    labelText: l10n.templateNameLabel,
+                  ),
+                ),
+              ),
+            const SizedBox(height: 8),
             RenderProgressView(
               progress: progress,
               onCancel: renderNotifier.cancel,
@@ -637,7 +660,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   FilledButton.icon(
                                     onPressed:
                                         (draft.isReadyToRender && !isRendering)
-                                        ? renderNotifier.startRender
+                                        ? () {
+                                            final templateName =
+                                                _templateNameController.text
+                                                    .trim();
+                                            if (_saveAsTemplate &&
+                                                templateName.isNotEmpty) {
+                                              templatesNotifier.save(
+                                                draftNotifier.captureTemplate(
+                                                  templateName,
+                                                ),
+                                              );
+                                            }
+                                            renderNotifier.startRender();
+                                          }
                                         : null,
                                     icon: const Icon(
                                       Icons.movie_creation_outlined,

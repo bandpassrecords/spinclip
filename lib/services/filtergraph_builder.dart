@@ -242,8 +242,12 @@ class FiltergraphBuilder {
     if (settings.vintageEffect) {
       final label = nextLabel('vintage');
       parts.add(
-        "[$base]eq=contrast=0.95:saturation=0.82,"
-        "colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131:0,"
+        "[$base]eq=contrast=0.95:saturation=0.9,"
+        // Full classic sepia (.393/.769/.189 etc.) blended 35% with the
+        // original colors (65% identity), rather than applying it at full
+        // strength - just a hint of warm/yellowed tone instead of a heavy
+        // brown-orange cast.
+        "colorchannelmixer=0.7876:0.2692:0.0662:0:0.1222:0.8901:0.0588:0:0.0952:0.1869:0.6959:0,"
         "vignette=PI/5,noise=alls=6:allf=t[$label]",
       );
       base = label;
