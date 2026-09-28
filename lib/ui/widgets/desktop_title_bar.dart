@@ -186,9 +186,14 @@ class _LanguageSwitcher extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLocale = ref.watch(localeProvider);
+    // The actually-active locale, whether the user picked one or it fell
+    // back to the system's - this is what the label should always reflect.
+    final effectiveLocale = Localizations.localeOf(context);
+    final currentLabel =
+        _labels[effectiveLocale.languageCode] ??
+        effectiveLocale.languageCode.toUpperCase();
     final color = Theme.of(context).textTheme.bodyMedium?.color;
     return PopupMenuButton<Locale?>(
-      icon: Icon(Icons.language, size: 18, color: color),
       tooltip: '',
       onSelected: (locale) =>
           ref.read(localeProvider.notifier).setLocale(locale),
@@ -208,6 +213,17 @@ class _LanguageSwitcher extends ConsumerWidget {
             ),
           ),
       ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.language, size: 16, color: color),
+            const SizedBox(width: 4),
+            Text(currentLabel, style: TextStyle(color: color, fontSize: 12)),
+          ],
+        ),
+      ),
     );
   }
 }
