@@ -43,6 +43,11 @@ function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_options(${TARGET} PRIVATE /EHsc)
   target_compile_definitions(${TARGET} PRIVATE "_HAS_EXCEPTIONS=0")
   target_compile_definitions(${TARGET} PRIVATE "$<$<CONFIG:Debug>:_DEBUG>")
+  # audioplayers_windows (as of 4.3.1) still includes <experimental/coroutine>,
+  # which newer MSVC/STL releases turn into a hard compile error rather than
+  # just a deprecation warning. This is the escape hatch Microsoft's own error
+  # message names; drop it once audioplayers_windows moves off the header.
+  target_compile_definitions(${TARGET} PRIVATE "_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS")
 endfunction()
 
 # Flutter library and tool build rules.
