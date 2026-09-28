@@ -17,9 +17,11 @@ at runtime (`<bundle>/tools/ffmpeg[.exe]` next to the app's own executable).
   (see `macos/Runner.xcodeproj/project.pbxproj`), copying `ffmpeg`/`ffprobe`
   from this folder into `<App>.app/Contents/MacOS/tools/`, and
   `FFMPEG_LICENSE.txt` into `<App>.app/Contents/Resources/` instead - NOT
-  alongside the binaries. codesign (even ad-hoc/unsigned) walks
-  `Contents/MacOS/` expecting only executables, and fails the whole app's
-  signature on finding a plain text file there.
+  alongside the binaries. The script also ad-hoc `codesign`s the two
+  binaries in place. Both matter for the same reason: the outer app's own
+  codesign pass (even ad-hoc, `CODE_SIGN_IDENTITY = "-"`) deep-scans
+  everything under `Contents/MacOS/` and fails the whole bundle's signature
+  if it finds either a non-executable file or an unsigned executable there.
 
 Listing them under `flutter: assets:` in `pubspec.yaml` would ship them
 inside every platform's bundle indiscriminately (Android, iOS, web too),
