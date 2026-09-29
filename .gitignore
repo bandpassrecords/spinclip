@@ -46,3 +46,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Preview gallery: local sample audio (commercial releases) and rendered output
+/tool/preview/samples/
+/tool/preview/out/

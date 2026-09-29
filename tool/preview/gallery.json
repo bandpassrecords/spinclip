@@ -1,0 +1,26 @@
+{
+  "name": "round-01",
+  "title": "Visualizer round 1",
+  "intro": "Audio Crawler – Beyond the Surface, 6 s from the middle of the track, 720p. Every clip is rendered through the app's own ffmpeg pipeline.",
+  "audio": "tool/preview/samples/beyond_the_surface_mid30.wav",
+  "cover": "tool/preview/samples/cover.jpeg",
+  "clipStart": 12,
+  "clipSeconds": 6,
+  "width": 1280,
+  "height": 720,
+  "base": { "placement": "bottomBand", "color": "0x33CCFF" },
+  "variants": [
+    { "title": "Bars · Auto", "note": "Default: log axis 60 Hz–16 kHz, mono mix.", "settings": { "style": "bars" } },
+    { "title": "Bars · 32 bars", "settings": { "style": "bars", "barCount": 32 } },
+    { "title": "Bars · 64 bars · sensitivity 2×", "settings": { "style": "bars", "barCount": 64, "sensitivity": 2.0 } },
+    { "title": "Bars · 48 bars · smoothness 0", "note": "Fastest bounce.", "settings": { "style": "bars", "barCount": 48, "smoothness": 0 } },
+    { "title": "Neon Glow · 48 bars", "settings": { "style": "neonGlow", "barCount": 48 } },
+    { "title": "Cartoon · Auto", "settings": { "style": "cartoon", "color": "0xFFCC33" } },
+    { "title": "Bars · gradient pink → blue", "settings": { "style": "bars", "barCount": 48, "color": "0xFF3366", "gradientColor": "0x33CCFF" } },
+    { "title": "Fluid Wave · gradient", "note": "Edge colour at top/bottom, second colour at the centre line.", "settings": { "style": "fluidWave", "color": "0xFF3366", "gradientColor": "0x33CCFF" } },
+    { "title": "Line Spectrum", "settings": { "style": "lineSpectrum" } },
+    { "title": "Neon Glow · mirrored · gradient", "settings": { "style": "neonGlow", "placement": "dualMirroredBottom", "barCount": 64, "color": "0xCC33FF", "gradientColor": "0x00FFFF" } },
+    { "title": "Bars · side columns", "settings": { "style": "bars", "placement": "coverCenterDualBars", "barCount": 24, "color": "0x33FF99" } },
+    { "title": "Cartoon · gradient · sensitivity 2×", "settings": { "style": "cartoon", "color": "0xFF6600", "gradientColor": "0xFFCC33", "sensitivity": 2.0 } }
+  ]
+}
