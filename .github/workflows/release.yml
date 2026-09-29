@@ -87,14 +87,16 @@ jobs:
           path: build/windows/x64/runner/Release/
           retention-days: 7
 
-  # Windows + macOS release builds, tag-triggered only. Windows ships both a
-  # plain zip of the Flutter release bundle and an unsigned MSIX package
-  # (msix_config in pubspec.yaml, `store: true` defers signing to the Store);
-  # macOS ships a plain zip only, with no code signing/notarization (neither
-  # needs any repo secrets today). macOS will show an "unidentified
-  # developer" warning on first launch until signing is added - revisit
-  # if/when this ships to the App Store or otherwise needs a smoother
-  # first-run experience.
+  # Windows + macOS release builds, tag-triggered only. Windows ships a plain
+  # zip of the Flutter release bundle, an unsigned MSIX package (msix_config
+  # in pubspec.yaml, `store: true` defers signing to the Store), and a
+  # traditional Inno Setup installer (installer.iss at repo root, same
+  # pattern as the daw-project-manager sibling project); macOS ships a plain
+  # zip only, with no code signing/notarization beyond the ad-hoc signing
+  # already applied to the bundled ffmpeg binaries (neither needs any repo
+  # secrets today). macOS will show an "unidentified developer" warning on
+  # first launch until real signing is added - revisit if/when this ships to
+  # the App Store or otherwise needs a smoother first-run experience.
   release_build_upload:
     name: Build & Upload (${{ matrix.os_name }})
     needs: unit_tests
@@ -183,6 +185,30 @@ jobs:
           zipName="Spinclip_macOS_${{ github.ref_name }}.zip"
           shasum -a 256 "$zipName" | awk '{print $1"  "$2}' > "$zipName.sha256"
 
+      - name: Install Inno Setup
+        if: matrix.os_name == 'Windows'
+        run: choco install innosetup --no-progress
+
+      # Reuses the already-built Release dir (installer.iss packages
+      # build/windows/x64/runner/Release, same dir the zip/MSIX above come
+      # from), so it picks up the same bundled ffmpeg/ffprobe.
+      - name: Build Windows Installer (Inno Setup)
+        if: matrix.os_name == 'Windows'
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ steps.build_version.outputs.version_name }}
+        run: iscc installer.iss
+
+      - name: Rename and checksum Windows Installer
+        if: matrix.os_name == 'Windows'
+        shell: pwsh
+        run: |
+          $installerFile = Get-ChildItem -Path "Output" -Filter "Spinclip_Installer_*.exe" | Select-Object -First 1
+          $installerName = "Spinclip_Installer_${{ github.ref_name }}.exe"
+          Move-Item $installerFile.FullName $installerName
+          $hash = (Get-FileHash $installerName -Algorithm SHA256).Hash.ToLower()
+          "$hash  $installerName" | Out-File -Encoding ascii "$installerName.sha256"
+
       - name: Find Existing Release URL
         id: find_release
         uses: actions/github-script@v6
@@ -243,6 +269,28 @@ jobs:
           upload_url: ${{ steps.find_release.outputs.upload_url }}
           asset_path: Spinclip_Windows_${{ github.ref_name }}.msix.sha256
           asset_name: Spinclip_Windows_${{ github.ref_name }}.msix.sha256
+          asset_content_type: text/plain
+
+      - name: Upload Windows Installer
+        if: matrix.os_name == 'Windows' && steps.find_release.outputs.upload_url != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.find_release.outputs.upload_url }}
+          asset_path: Spinclip_Installer_${{ github.ref_name }}.exe
+          asset_name: Spinclip_Installer_${{ github.ref_name }}.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
+
+      - name: Upload Windows Installer SHA256 Checksum
+        if: matrix.os_name == 'Windows' && steps.find_release.outputs.upload_url != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.find_release.outputs.upload_url }}
+          asset_path: Spinclip_Installer_${{ github.ref_name }}.exe.sha256
+          asset_name: Spinclip_Installer_${{ github.ref_name }}.exe.sha256
           asset_content_type: text/plain
 
   # Plain tarball of the Flutter Linux bundle - a normal `flutter build linux`

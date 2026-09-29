@@ -37,6 +37,8 @@
 - **ffmpeg/ffprobe are now bundled** for Windows and macOS — end users no longer need to install
   anything themselves on those platforms.
 - **Windows MSIX packaging**, built and uploaded alongside the existing zip in CI.
+- **Windows Inno Setup installer** (`installer.iss`), built and uploaded alongside the zip/MSIX
+  in CI — a traditional install-wizard `.exe` alternative to those two.
 
 ### Fixes
 - The QR code overlay wasn't appearing in the live preview (only in the final render) - the
@@ -51,6 +53,8 @@
 - The Windows MSIX is unsigned (`store: true` defers signing to a future Store submission) and
   its `publisher` identity is inherited from the `daw-project-manager` sibling project's Partner
   Center account — worth confirming before a real submission.
+- The Windows Inno Setup installer is also unsigned, so it will show a SmartScreen warning on
+  first run like the MSIX/zip builds do.
 
 ---
 

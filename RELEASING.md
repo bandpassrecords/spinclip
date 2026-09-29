@@ -13,8 +13,9 @@ CI enforces this — a tag push fails immediately if `CHANGELOG.md` has no match
    workflow attaches build artifacts to an *existing* release, it does not create one.
 4. Push the tag (if not already pushed with `--push`). `.github/workflows/release.yml` then:
    - Verifies `CHANGELOG.md` matches the tag and runs `flutter analyze` + `flutter test`.
-   - Builds an unsigned Windows zip + unsigned Windows MSIX, an unsigned macOS zip, and a Linux
-     tarball, each with a `.sha256` checksum, and attaches them to the release.
+   - Builds an unsigned Windows zip + unsigned Windows MSIX + unsigned Windows Inno Setup
+     installer (`installer.iss` at repo root), an unsigned macOS zip, and a Linux tarball, each
+     with a `.sha256` checksum, and attaches them to the release.
 
 Every pull request against `main` also runs the test suite and a Windows build check
 (`test_pr_build`), independent of tagging.

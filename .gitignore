@@ -33,6 +33,9 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Inno Setup compiler output (installer.iss)
+/Output/
+
 # Symbolication related
 app.*.symbols
 
