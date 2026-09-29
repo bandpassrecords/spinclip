@@ -120,6 +120,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String visualizerSensitivityLabel(String value) {
+    return 'Visualizer sensitivity: ${value}x';
+  }
+
+  @override
+  String visualizerBarCountLabel(int count) {
+    return 'Number of bars: $count';
+  }
+
+  @override
+  String get visualizerBarCountAuto => 'Number of bars: Auto';
+
+  @override
+  String get visualizerBarCountAutoShort => 'Auto';
+
+  @override
   String get showCoverArt => 'Show cover art';
 
   @override
@@ -190,6 +206,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get previewExcerptButton => 'Preview the selected excerpt';
+
+  @override
+  String get songInfoLoading => 'Reading song details...';
+
+  @override
+  String get songInfoError =>
+      'Couldn\'t read this file. Check that it\'s a supported audio file.';
+
+  @override
+  String get playSongButton => 'Play song';
+
+  @override
+  String get channelsMono => 'Mono';
+
+  @override
+  String get channelsStereo => 'Stereo';
+
+  @override
+  String channelsCount(int count) {
+    return '$count channels';
+  }
+
+  @override
+  String get audioLossless => 'Lossless';
+
+  @override
+  String get audioLossy => 'Lossy';
 
   @override
   String get addSong => 'Add song';
@@ -296,6 +339,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleOscilloscope => 'Oscilloscope';
 
   @override
+  String get styleNeonGlow => 'Neon Glow';
+
+  @override
+  String get styleCartoon => 'Cartoon';
+
+  @override
   String get reviewSummaryTitle => 'Summary';
 
   @override
@@ -341,6 +390,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get extractingColor => 'Extracting color...';
+
+  @override
+  String get colorCustom => 'Custom…';
+
+  @override
+  String get colorPickerTitle => 'Pick a color';
+
+  @override
+  String get colorPickerApply => 'Apply';
+
+  @override
+  String get visualizerGradientLabel => 'Gradient';
+
+  @override
+  String get visualizerGradientHint =>
+      'Blend from the edge into a second color at the bar tips';
+
+  @override
+  String get visualizerGradientColorLabel => 'Tip color';
 
   @override
   String get vintageEffectLabel => 'Vintage look';
@@ -402,6 +470,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loadTemplateButton => 'Load template';
+
+  @override
+  String get builtInDefaultTemplateLabel => 'Spinclip default (Bars 48)';
 
   @override
   String get saveAsTemplateButton => 'Save as template';

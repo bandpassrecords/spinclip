@@ -25,6 +25,7 @@ import '../widgets/preview_panel.dart';
 import '../widgets/release_mode_picker.dart';
 import '../widgets/render_progress_view.dart';
 import '../widgets/review_summary_row.dart';
+import '../widgets/song_preview_card.dart';
 import '../widgets/template_combo_box.dart';
 import '../widgets/track_list_editor.dart';
 import '../widgets/visualizer_placement_picker.dart';
@@ -293,6 +294,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               selectedPath: draft.imagePath,
               allowedExtensions: const ['png', 'jpg', 'jpeg'],
               onFileSelected: draftNotifier.setImagePath,
+              showImagePreview: true,
             ),
             const SizedBox(height: 12),
             if (draft.releaseMode == ReleaseMode.single)
@@ -308,8 +310,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   'm4a',
                 ],
                 onFileSelected: draftNotifier.setAudioPath,
-              )
-            else ...[
+              ),
+            if (draft.releaseMode == ReleaseMode.single &&
+                draft.audioPath != null) ...[
+              const SizedBox(height: 12),
+              SongPreviewCard(
+                audioPath: draft.audioPath!,
+                waveColor: colorFromHex(draft.visualizerColorHex),
+                showFileName: false,
+              ),
+            ],
+            if (draft.releaseMode != ReleaseMode.single) ...[
               if (draft.releaseMode == ReleaseMode.medley) ...[
                 Text(
                   l10n.medleyExplanation,
@@ -327,6 +338,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 isMedley: draft.releaseMode == ReleaseMode.medley,
                 defaultSnippetDuration: draft.snippetDurationSeconds,
                 defaultImagePath: draft.imagePath,
+                waveColor: colorFromHex(draft.visualizerColorHex),
                 onAddTracks: draftNotifier.addTracks,
                 onRemoveTrack: draftNotifier.removeTrackAt,
                 onUpdateTrack: draftNotifier.updateTrackAt,
@@ -344,11 +356,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               VisualizerPlacementPicker(
                 value: draft.placement,
                 onChanged: draftNotifier.setPlacement,
+                color: colorFromHex(draft.visualizerColorHex),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               VisualizerStylePicker(
                 value: draft.style,
                 onChanged: draftNotifier.setStyle,
+                color: colorFromHex(draft.visualizerColorHex),
               ),
             ],
           ),
@@ -365,8 +379,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 visualizerSmoothness: draft.visualizerSmoothness,
                 onVisualizerSmoothnessChanged:
                     draftNotifier.setVisualizerSmoothness,
+                visualizerSensitivity: draft.visualizerSensitivity,
+                onVisualizerSensitivityChanged:
+                    draftNotifier.setVisualizerSensitivity,
+                visualizerBarCount: draft.visualizerBarCount,
+                onVisualizerBarCountChanged:
+                    draftNotifier.setVisualizerBarCount,
                 visualizerColorHex: draft.visualizerColorHex,
                 onVisualizerColorChanged: draftNotifier.setColor,
+                visualizerGradient: draft.visualizerGradient,
+                onVisualizerGradientChanged: draftNotifier.setGradient,
+                visualizerGradientColorHex: draft.visualizerGradientColorHex,
+                onVisualizerGradientColorChanged:
+                    draftNotifier.setGradientColor,
                 coverImagePath: draft.imagePath,
                 vintageEffect: draft.vintageEffect,
                 onVintageEffectChanged: draftNotifier.setVintageEffect,

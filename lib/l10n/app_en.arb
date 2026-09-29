@@ -63,6 +63,16 @@
   "@visualizerSmoothnessLabel": {
     "placeholders": {"percent": {"type": "int"}}
   },
+  "visualizerSensitivityLabel": "Visualizer sensitivity: {value}x",
+  "@visualizerSensitivityLabel": {
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "visualizerBarCountLabel": "Number of bars: {count}",
+  "@visualizerBarCountLabel": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "visualizerBarCountAuto": "Number of bars: Auto",
+  "visualizerBarCountAutoShort": "Auto",
   "showCoverArt": "Show cover art",
   "coverSizeLabel": "Cover size: {percent}%",
   "@coverSizeLabel": {
@@ -104,6 +114,17 @@
     }
   },
   "previewExcerptButton": "Preview the selected excerpt",
+  "songInfoLoading": "Reading song details...",
+  "songInfoError": "Couldn't read this file. Check that it's a supported audio file.",
+  "playSongButton": "Play song",
+  "channelsMono": "Mono",
+  "channelsStereo": "Stereo",
+  "channelsCount": "{count} channels",
+  "@channelsCount": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "audioLossless": "Lossless",
+  "audioLossy": "Lossy",
 
   "addSong": "Add song",
   "trackStartSeconds": "Start (s)",
@@ -155,6 +176,8 @@
   "styleLineSpectrum": "Line Spectrum",
   "styleFluidWave": "Fluid Wave",
   "styleOscilloscope": "Oscilloscope",
+  "styleNeonGlow": "Neon Glow",
+  "styleCartoon": "Cartoon",
 
   "reviewSummaryTitle": "Summary",
   "reviewEditTooltip": "Edit",
@@ -175,6 +198,12 @@
   "colorThemeDark": "Dark",
   "colorThemeSparkling": "Sparkling",
   "extractingColor": "Extracting color...",
+  "colorCustom": "Custom…",
+  "colorPickerTitle": "Pick a color",
+  "colorPickerApply": "Apply",
+  "visualizerGradientLabel": "Gradient",
+  "visualizerGradientHint": "Blend from the edge into a second color at the bar tips",
+  "visualizerGradientColorLabel": "Tip color",
   "vintageEffectLabel": "Vintage look",
   "vintageEffectSubtitle": "Mild old-school aging: warm tone, soft vignette, light film grain.",
 
@@ -205,6 +234,7 @@
   "trackClearCoverTooltip": "Remove custom cover",
 
   "loadTemplateButton": "Load template",
+  "builtInDefaultTemplateLabel": "Spinclip default (Bars 48)",
   "saveAsTemplateButton": "Save as template",
   "templateNameLabel": "Template name",
   "noTemplatesSaved": "No saved templates yet",

@@ -11,12 +11,20 @@ import 'visualizer_style.dart';
 class RenderTemplate {
   final String name;
 
+  /// Ships with the app (see builtInTemplates): always listed, never saved
+  /// to or deleted from the user's template file.
+  final bool builtIn;
+
   final ReleaseMode releaseMode;
   final VisualizerPlacement placement;
   final VisualizerStyle style;
   final String visualizerColorHex;
+  final bool visualizerGradient;
+  final String visualizerGradientColorHex;
   final double blurRadius;
   final double visualizerSmoothness;
+  final double visualizerSensitivity;
+  final int visualizerBarCount;
 
   final bool showCover;
   final double coverSizeFraction;
@@ -50,12 +58,17 @@ class RenderTemplate {
 
   const RenderTemplate({
     required this.name,
+    this.builtIn = false,
     required this.releaseMode,
     required this.placement,
     required this.style,
     required this.visualizerColorHex,
+    required this.visualizerGradient,
+    required this.visualizerGradientColorHex,
     required this.blurRadius,
     required this.visualizerSmoothness,
+    required this.visualizerSensitivity,
+    required this.visualizerBarCount,
     required this.showCover,
     required this.coverSizeFraction,
     required this.coverTransform,
@@ -86,8 +99,12 @@ class RenderTemplate {
     'placement': placement.name,
     'style': style.name,
     'visualizerColorHex': visualizerColorHex,
+    'visualizerGradient': visualizerGradient,
+    'visualizerGradientColorHex': visualizerGradientColorHex,
     'blurRadius': blurRadius,
     'visualizerSmoothness': visualizerSmoothness,
+    'visualizerSensitivity': visualizerSensitivity,
+    'visualizerBarCount': visualizerBarCount,
     'showCover': showCover,
     'coverSizeFraction': coverSizeFraction,
     'coverTransform': _transformToJson(coverTransform),
@@ -162,9 +179,15 @@ class RenderTemplate {
         json['style'] as String? ?? VisualizerStyle.bars.name,
       ),
       visualizerColorHex: json['visualizerColorHex'] as String? ?? '0x33CCFF',
+      visualizerGradient: json['visualizerGradient'] as bool? ?? false,
+      visualizerGradientColorHex:
+          json['visualizerGradientColorHex'] as String? ?? '0xFF3366',
       blurRadius: (json['blurRadius'] as num?)?.toDouble() ?? 20,
       visualizerSmoothness:
           (json['visualizerSmoothness'] as num?)?.toDouble() ?? 0.5,
+      visualizerSensitivity:
+          (json['visualizerSensitivity'] as num?)?.toDouble() ?? 1.0,
+      visualizerBarCount: (json['visualizerBarCount'] as num?)?.toInt() ?? 0,
       showCover: json['showCover'] as bool? ?? true,
       coverSizeFraction:
           (json['coverSizeFraction'] as num?)?.toDouble() ?? 0.82,

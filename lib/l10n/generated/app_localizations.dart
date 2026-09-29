@@ -292,6 +292,30 @@ abstract class AppLocalizations {
   /// **'Visualizer smoothness: {percent}%'**
   String visualizerSmoothnessLabel(int percent);
 
+  /// No description provided for @visualizerSensitivityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Visualizer sensitivity: {value}x'**
+  String visualizerSensitivityLabel(String value);
+
+  /// No description provided for @visualizerBarCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of bars: {count}'**
+  String visualizerBarCountLabel(int count);
+
+  /// No description provided for @visualizerBarCountAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of bars: Auto'**
+  String get visualizerBarCountAuto;
+
+  /// No description provided for @visualizerBarCountAutoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get visualizerBarCountAutoShort;
+
   /// No description provided for @showCoverArt.
   ///
   /// In en, this message translates to:
@@ -411,6 +435,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preview the selected excerpt'**
   String get previewExcerptButton;
+
+  /// No description provided for @songInfoLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading song details...'**
+  String get songInfoLoading;
+
+  /// No description provided for @songInfoError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read this file. Check that it\'s a supported audio file.'**
+  String get songInfoError;
+
+  /// No description provided for @playSongButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Play song'**
+  String get playSongButton;
+
+  /// No description provided for @channelsMono.
+  ///
+  /// In en, this message translates to:
+  /// **'Mono'**
+  String get channelsMono;
+
+  /// No description provided for @channelsStereo.
+  ///
+  /// In en, this message translates to:
+  /// **'Stereo'**
+  String get channelsStereo;
+
+  /// No description provided for @channelsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} channels'**
+  String channelsCount(int count);
+
+  /// No description provided for @audioLossless.
+  ///
+  /// In en, this message translates to:
+  /// **'Lossless'**
+  String get audioLossless;
+
+  /// No description provided for @audioLossy.
+  ///
+  /// In en, this message translates to:
+  /// **'Lossy'**
+  String get audioLossy;
 
   /// No description provided for @addSong.
   ///
@@ -597,6 +669,18 @@ abstract class AppLocalizations {
   /// **'Oscilloscope'**
   String get styleOscilloscope;
 
+  /// No description provided for @styleNeonGlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Neon Glow'**
+  String get styleNeonGlow;
+
+  /// No description provided for @styleCartoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Cartoon'**
+  String get styleCartoon;
+
   /// No description provided for @reviewSummaryTitle.
   ///
   /// In en, this message translates to:
@@ -686,6 +770,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Extracting color...'**
   String get extractingColor;
+
+  /// No description provided for @colorCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom…'**
+  String get colorCustom;
+
+  /// No description provided for @colorPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a color'**
+  String get colorPickerTitle;
+
+  /// No description provided for @colorPickerApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get colorPickerApply;
+
+  /// No description provided for @visualizerGradientLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gradient'**
+  String get visualizerGradientLabel;
+
+  /// No description provided for @visualizerGradientHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Blend from the edge into a second color at the bar tips'**
+  String get visualizerGradientHint;
+
+  /// No description provided for @visualizerGradientColorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip color'**
+  String get visualizerGradientColorLabel;
 
   /// No description provided for @vintageEffectLabel.
   ///
@@ -794,6 +914,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Load template'**
   String get loadTemplateButton;
+
+  /// No description provided for @builtInDefaultTemplateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Spinclip default (Bars 48)'**
+  String get builtInDefaultTemplateLabel;
 
   /// No description provided for @saveAsTemplateButton.
   ///
