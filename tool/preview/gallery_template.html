@@ -1,0 +1,359 @@
+<title>Visualizer Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a grading-suite review wall - header with the round's tally, then
+   a two-up grid of numbered clip cards, each with its settings readout and a
+   verdict strip. Deliberately single dark theme: clips are judged on dark,
+   like a monitor in a dimmed room. */
+:root {
+  color-scheme: dark;
+  --bg: #121419;
+  --panel: #1a1d24;
+  --panel-2: #22262f;
+  --line: #2e333e;
+  --fg: #e8e6e1;
+  --muted: #9aa0ab;
+  --accent: #f2a93b;      /* VU-meter amber */
+  --accent-ink: #1b1305;
+  --keep: #5fcf8f;
+  --tweak: #f2a93b;
+  --drop: #ef6a6a;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --radius: 10px;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.55 var(--font-body);
+  padding-inline: clamp(16px, 4vw, 48px);
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 1280px; margin-inline: auto; display: grid; gap: 28px; }
+
+header { display: grid; gap: 14px; }
+.eyebrow {
+  font: 500 12px/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+h1 {
+  font: 700 clamp(28px, 4.5vw, 44px)/1.05 var(--font-display);
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+.intro { color: var(--muted); max-width: 65ch; margin: 0; }
+.tally { display: flex; flex-wrap: wrap; gap: 8px; }
+.tally span {
+  font: 500 13px/1 var(--font-mono);
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.tally b { color: var(--fg); font-weight: 500; }
+.status { font: 13px/1.4 var(--font-mono); color: var(--muted); margin: 0; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr));
+  gap: 20px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+.card[data-verdict="keep"] { border-color: color-mix(in srgb, var(--keep) 55%, var(--line)); }
+.card[data-verdict="tweak"] { border-color: color-mix(in srgb, var(--tweak) 55%, var(--line)); }
+.card[data-verdict="drop"] { border-color: color-mix(in srgb, var(--drop) 55%, var(--line)); }
+video {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+.body { padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.head { display: flex; gap: 12px; align-items: baseline; min-width: 0; }
+.num {
+  font: 500 13px/1 var(--font-mono);
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+h2 { font: 600 18px/1.25 var(--font-display); margin: 0; min-width: 0; }
+.note { color: var(--muted); margin: 0; font-size: 14px; }
+.readout { display: flex; flex-wrap: wrap; gap: 6px; }
+.readout span {
+  font: 12px/1 var(--font-mono);
+  padding: 6px 8px;
+  background: var(--panel-2);
+  border-radius: 6px;
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.readout i {
+  width: 10px; height: 10px; border-radius: 2px; display: inline-block;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+}
+.readout .k { color: var(--muted); }
+
+.verdict { display: flex; gap: 6px; flex-wrap: wrap; }
+.verdict button {
+  font: 500 13px/1 var(--font-body);
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+}
+.verdict button:hover:not(:disabled) { background: var(--panel-2); }
+.verdict button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.verdict button:disabled { opacity: 0.45; cursor: default; }
+.verdict button[aria-pressed="true"][data-v="keep"] { background: var(--keep); border-color: var(--keep); color: #0d2016; }
+.verdict button[aria-pressed="true"][data-v="tweak"] { background: var(--tweak); border-color: var(--tweak); color: var(--accent-ink); }
+.verdict button[aria-pressed="true"][data-v="drop"] { background: var(--drop); border-color: var(--drop); color: #2a0b0b; }
+textarea {
+  width: 100%;
+  min-height: 64px;
+  resize: vertical;
+  font: 14px/1.45 var(--font-body);
+  color: var(--fg);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+textarea::placeholder { color: var(--muted); }
+textarea:disabled { opacity: 0.5; }
+.saved { font: 12px/1 var(--font-mono); color: var(--muted); min-height: 12px; }
+@media (prefers-reduced-motion: no-preference) {
+  .card { transition: border-color 160ms ease; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="round"></div>
+    <h1 id="title">__GALLERY_TITLE__</h1>
+    <p class="intro" id="intro"></p>
+    <div class="tally" id="tally" aria-live="polite"></div>
+    <p class="status" id="status">Connecting to the feedback store...</p>
+  </header>
+  <main class="grid" id="grid"></main>
+</div>
+
+<script type="application/json" id="gallery-data">__GALLERY_DATA__</script>
+<script>
+(function () {
+  const data = JSON.parse(document.getElementById('gallery-data').textContent);
+  const round = data.name;
+  const grid = document.getElementById('grid');
+  const status = document.getElementById('status');
+  const tally = document.getElementById('tally');
+  const LABELS = { keep: 'Keep', tweak: 'Tweak', drop: 'Drop' };
+  const STYLE_NAMES = {
+    bars: 'Bars', lineSpectrum: 'Line spectrum', fluidWave: 'Fluid wave',
+    oscilloscope: 'Oscilloscope', neonGlow: 'Neon glow', cartoon: 'Cartoon'
+  };
+  const PLACEMENT_NAMES = {
+    bottomBand: 'Bottom band', sideBorder: 'Side border',
+    dualMirroredBottom: 'Mirrored bottom', fullFrameBorder: 'Top + bottom',
+    ascendingCorner: 'Corner', centeredBehindText: 'Centre',
+    coverCenterDualBars: 'Side columns'
+  };
+
+  document.getElementById('round').textContent = round.replace('-', ' ');
+  document.getElementById('intro').textContent = data.intro || '';
+
+  // Local state per variant: {verdict, note}. The store is the source of
+  // truth; this mirrors it plus unsaved typing.
+  const state = {};
+  const cards = {};
+  let db = null;
+
+  function hex(v) { return '#' + String(v).replace(/^0x/i, ''); }
+
+  function readout(s) {
+    const items = [];
+    const add = (k, v, swatch) => items.push({ k, v, swatch });
+    if (s.style) add('style', STYLE_NAMES[s.style] || s.style);
+    if (s.placement) add('place', PLACEMENT_NAMES[s.placement] || s.placement);
+    add('bars', s.barCount ? String(s.barCount) : 'auto');
+    add('sens', (s.sensitivity || 1).toFixed(1) + '×');
+    add('smooth', s.smoothness == null ? '0.5' : String(s.smoothness));
+    if (s.color) add(s.gradientColor ? 'base' : 'color', s.color.replace(/^0x/i, '#'), s.color);
+    if (s.gradientColor) add('tip', s.gradientColor.replace(/^0x/i, '#'), s.gradientColor);
+    return items;
+  }
+
+  function el(tag, props, children) {
+    const n = document.createElement(tag);
+    Object.assign(n, props || {});
+    (children || []).forEach(c => n.append(c));
+    return n;
+  }
+
+  data.variants.forEach(v => {
+    state[v.id] = { verdict: null, note: '' };
+    const video = el('video', {
+      src: v.clip, poster: v.poster, controls: true, preload: 'metadata',
+      playsInline: true
+    });
+    video.setAttribute('aria-label', 'Clip ' + v.id + ': ' + v.title);
+    const chips = el('div', { className: 'readout' });
+    readout(v.settings).forEach(r => {
+      const chip = el('span');
+      if (r.swatch) {
+        const i = el('i');
+        i.style.background = hex(r.swatch);
+        chip.append(i);
+      }
+      chip.append(el('span', { className: 'k', textContent: r.k }), r.v);
+      chips.append(chip);
+    });
+    const buttons = {};
+    const verdict = el('div', { className: 'verdict', role: 'group' });
+    verdict.setAttribute('aria-label', 'Verdict for clip ' + v.id);
+    Object.keys(LABELS).forEach(key => {
+      const b = el('button', { type: 'button', textContent: LABELS[key], disabled: true });
+      b.dataset.v = key;
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', () => {
+        const s = state[v.id];
+        s.verdict = s.verdict === key ? null : key;
+        paint(v.id);
+        save(v);
+      });
+      buttons[key] = b;
+      verdict.append(b);
+    });
+    const note = el('textarea', {
+      id: 'note-' + round + '-' + v.id,
+      placeholder: 'What would you change? e.g. "thicker bars", "slower fall"',
+      disabled: true
+    });
+    note.setAttribute('aria-label', 'Notes for clip ' + v.id);
+    let timer = null;
+    note.addEventListener('input', () => {
+      state[v.id].note = note.value;
+      clearTimeout(timer);
+      timer = setTimeout(() => save(v), 800);
+    });
+    note.addEventListener('blur', () => {
+      if (timer) { clearTimeout(timer); timer = null; save(v); }
+    });
+    const saved = el('div', { className: 'saved' });
+    const card = el('article', { className: 'card' }, [
+      video,
+      el('div', { className: 'body' }, [
+        el('div', { className: 'head' }, [
+          el('span', { className: 'num', textContent: '#' + v.id }),
+          el('h2', { textContent: v.title })
+        ]),
+        v.note ? el('p', { className: 'note', textContent: v.note }) : '',
+        chips, verdict, note, saved
+      ])
+    ]);
+    cards[v.id] = { card, buttons, note, saved };
+    grid.append(card);
+  });
+
+  function paint(id) {
+    const s = state[id];
+    const c = cards[id];
+    Object.entries(c.buttons).forEach(([k, b]) =>
+      b.setAttribute('aria-pressed', String(s.verdict === k)));
+    if (s.verdict) c.card.dataset.verdict = s.verdict;
+    else delete c.card.dataset.verdict;
+    if (document.activeElement !== c.note) c.note.value = s.note;
+    paintTally();
+  }
+
+  function paintTally() {
+    const counts = { keep: 0, tweak: 0, drop: 0 };
+    let open = 0;
+    Object.values(state).forEach(s => s.verdict ? counts[s.verdict]++ : open++);
+    tally.replaceChildren(
+      ...Object.keys(LABELS).map(k => {
+        const s = el('span');
+        s.append(el('b', { textContent: String(counts[k]) }), ' ' + LABELS[k].toLowerCase());
+        return s;
+      }),
+      (() => { const s = el('span'); s.append(el('b', { textContent: String(open) }), ' not rated'); return s; })()
+    );
+  }
+  paintTally();
+
+  // One write at a time per clip: chain each save behind the previous one.
+  const chains = {};
+  function save(v) {
+    if (!db) return;
+    const s = state[v.id];
+    const c = cards[v.id];
+    const body = {
+      round, variant: v.id, title: v.title, settings: v.settings,
+      verdict: s.verdict, note: s.note, updatedAt: new Date().toISOString()
+    };
+    c.saved.textContent = 'Saving...';
+    chains[v.id] = (chains[v.id] || Promise.resolve()).then(() =>
+      db.doc('feedback/' + round + '-' + v.id).set(body)
+    ).then(() => {
+      c.saved.textContent = 'Saved';
+    }).catch(e => {
+      const code = e && e.code;
+      c.saved.textContent = code === 'invalid_argument'
+        ? 'You can view this round but not save feedback on it.'
+        : 'Not saved. Check your connection and try again.';
+    });
+  }
+
+  function enable(on) {
+    Object.values(cards).forEach(c => {
+      Object.values(c.buttons).forEach(b => { b.disabled = !on; });
+      c.note.disabled = !on;
+    });
+  }
+
+  if (!window.claude || typeof window.claude.use !== 'function') {
+    status.textContent = 'Feedback saving works when this page is opened on claude.ai.';
+    return;
+  }
+  window.claude.use('db').then(store => {
+    if (!store) {
+      status.textContent = 'Feedback saving is not available in this view. You can still watch the clips.';
+      return;
+    }
+    db = store;
+    enable(true);
+    status.textContent = 'Your verdicts and notes save as you go. Claude reads them for the next round.';
+    db.collection('feedback').where('round', '==', round).onSnapshot(snap => {
+      snap.docs.forEach(d => {
+        const body = d.data();
+        if (!body || !state[body.variant]) return;
+        state[body.variant].verdict = body.verdict || null;
+        if (document.activeElement !== cards[body.variant].note) {
+          state[body.variant].note = body.note || '';
+        }
+        paint(body.variant);
+      });
+    }, () => {
+      status.textContent = 'Lost the connection to the feedback store. Reload the page to reconnect.';
+    });
+  });
+})();
+</script>

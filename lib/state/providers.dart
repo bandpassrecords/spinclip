@@ -42,8 +42,12 @@ class DraftSettings {
   final VisualizerPlacement placement;
   final VisualizerStyle style;
   final String visualizerColorHex;
+  final bool visualizerGradient;
+  final String visualizerGradientColorHex;
   final double blurRadius;
   final double visualizerSmoothness;
+  final double visualizerSensitivity;
+  final int visualizerBarCount;
   final bool showCover;
   final double coverSizeFraction;
   final ElementTransform coverTransform;
@@ -88,8 +92,15 @@ class DraftSettings {
     this.placement = VisualizerPlacement.bottomBand,
     this.style = VisualizerStyle.bars,
     this.visualizerColorHex = '0x33CCFF',
+    this.visualizerGradient = false,
+    this.visualizerGradientColorHex = '0xFF3366',
     this.blurRadius = 20,
-    this.visualizerSmoothness = 0.5,
+    // Default look: Bars, 48 bars, smoothness 0 (fastest bounce), bottom
+    // band, cyan - picked in visualizer review round 1 (clip #04). The
+    // built-in default template is built from these same values.
+    this.visualizerSmoothness = 0,
+    this.visualizerSensitivity = 1.0,
+    this.visualizerBarCount = 48,
     this.showCover = true,
     this.coverSizeFraction = 0.82,
     this.coverTransform = ElementTransform.center,
@@ -147,8 +158,12 @@ class DraftSettings {
       placement: placement,
       style: style,
       visualizerColorHex: visualizerColorHex,
+      visualizerGradient: visualizerGradient,
+      visualizerGradientColorHex: visualizerGradientColorHex,
       blurRadius: blurRadius,
       visualizerSmoothness: visualizerSmoothness,
+      visualizerSensitivity: visualizerSensitivity,
+      visualizerBarCount: visualizerBarCount,
       showCover: showCover,
       coverSizeFraction: coverSizeFraction,
       coverTransform: coverTransform,
@@ -185,8 +200,12 @@ class DraftSettings {
       placement: placement,
       style: style,
       visualizerColorHex: visualizerColorHex,
+      visualizerGradient: visualizerGradient,
+      visualizerGradientColorHex: visualizerGradientColorHex,
       blurRadius: blurRadius,
       visualizerSmoothness: visualizerSmoothness,
+      visualizerSensitivity: visualizerSensitivity,
+      visualizerBarCount: visualizerBarCount,
       showCover: showCover,
       coverSizeFraction: coverSizeFraction,
       coverTransform: coverTransform,
@@ -228,8 +247,12 @@ class DraftSettings {
     VisualizerPlacement? placement,
     VisualizerStyle? style,
     String? visualizerColorHex,
+    bool? visualizerGradient,
+    String? visualizerGradientColorHex,
     double? blurRadius,
     double? visualizerSmoothness,
+    double? visualizerSensitivity,
+    int? visualizerBarCount,
     bool? showCover,
     double? coverSizeFraction,
     ElementTransform? coverTransform,
@@ -269,8 +292,14 @@ class DraftSettings {
       placement: placement ?? this.placement,
       style: style ?? this.style,
       visualizerColorHex: visualizerColorHex ?? this.visualizerColorHex,
+      visualizerGradient: visualizerGradient ?? this.visualizerGradient,
+      visualizerGradientColorHex:
+          visualizerGradientColorHex ?? this.visualizerGradientColorHex,
       blurRadius: blurRadius ?? this.blurRadius,
       visualizerSmoothness: visualizerSmoothness ?? this.visualizerSmoothness,
+      visualizerSensitivity:
+          visualizerSensitivity ?? this.visualizerSensitivity,
+      visualizerBarCount: visualizerBarCount ?? this.visualizerBarCount,
       showCover: showCover ?? this.showCover,
       coverSizeFraction: coverSizeFraction ?? this.coverSizeFraction,
       coverTransform: coverTransform ?? this.coverTransform,
@@ -301,6 +330,68 @@ class DraftSettings {
     );
   }
 }
+
+/// Snapshots everything about how the video looks and behaves - but not
+/// the actual cover image(s)/song(s)/output directory - so it can be
+/// reapplied to a different release later.
+RenderTemplate templateFromDraft(
+  DraftSettings settings,
+  String name, {
+  bool builtIn = false,
+}) {
+  return RenderTemplate(
+    name: name,
+    builtIn: builtIn,
+    releaseMode: settings.releaseMode,
+    placement: settings.placement,
+    style: settings.style,
+    visualizerColorHex: settings.visualizerColorHex,
+    visualizerGradient: settings.visualizerGradient,
+    visualizerGradientColorHex: settings.visualizerGradientColorHex,
+    blurRadius: settings.blurRadius,
+    visualizerSmoothness: settings.visualizerSmoothness,
+    visualizerSensitivity: settings.visualizerSensitivity,
+    visualizerBarCount: settings.visualizerBarCount,
+    showCover: settings.showCover,
+    coverSizeFraction: settings.coverSizeFraction,
+    coverTransform: settings.coverTransform,
+    showLogo: settings.showLogo,
+    logoImagePath: settings.logoImagePath,
+    logoTransform: settings.logoTransform,
+    showText: settings.showText,
+    textContent: settings.textContent,
+    textTransform: settings.textTransform,
+    showQrCode: settings.showQrCode,
+    qrCodeContent: settings.qrCodeContent,
+    qrCaptionText: settings.qrCaptionText,
+    qrCaptionPosition: settings.qrCaptionPosition,
+    qrTransform: settings.qrTransform,
+    fadeInSeconds: settings.fadeInSeconds,
+    fadeOutSeconds: settings.fadeOutSeconds,
+    fullDuration: settings.fullDuration,
+    vintageEffect: settings.vintageEffect,
+    selectedPresetIds: settings.selectedPresetIds,
+    resolutionOverrides: settings.resolutionOverrides,
+    useHardwareAcceleration: settings.useHardwareAcceleration,
+    losslessAudio: settings.losslessAudio,
+  );
+}
+
+/// Name of the template that ships with the app. Stored as an internal id
+/// (never shown: the UI displays a localized label) so it can't collide
+/// with a name the user types.
+const builtInDefaultTemplateName = '__spinclip_default__';
+
+/// Templates that ship with the app, listed before the user's own. The
+/// default one is built from a fresh DraftSettings, so it always matches
+/// the look a new project starts with.
+final builtInTemplates = [
+  templateFromDraft(
+    const DraftSettings(),
+    builtInDefaultTemplateName,
+    builtIn: true,
+  ),
+];
 
 class DraftSettingsNotifier extends Notifier<DraftSettings> {
   @override
@@ -372,6 +463,9 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
       state = state.copyWith(placement: v);
   void setStyle(VisualizerStyle v) => state = state.copyWith(style: v);
   void setColor(String hex) => state = state.copyWith(visualizerColorHex: hex);
+  void setGradient(bool v) => state = state.copyWith(visualizerGradient: v);
+  void setGradientColor(String hex) =>
+      state = state.copyWith(visualizerGradientColorHex: hex);
   void setBlurRadius(double v) => state = state.copyWith(blurRadius: v);
   void setShowCover(bool v) => state = state.copyWith(showCover: v);
   void setCoverSizeFraction(double v) =>
@@ -408,6 +502,10 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
   void setFadeOutSeconds(double v) => state = state.copyWith(fadeOutSeconds: v);
   void setVisualizerSmoothness(double v) =>
       state = state.copyWith(visualizerSmoothness: v);
+  void setVisualizerSensitivity(double v) =>
+      state = state.copyWith(visualizerSensitivity: v);
+  void setVisualizerBarCount(int v) =>
+      state = state.copyWith(visualizerBarCount: v);
   void setFullDuration(bool v) => state = state.copyWith(fullDuration: v);
   void setTrimStart(double v) => state = state.copyWith(trimStartSeconds: v);
   void setTrimDuration(double? v) =>
@@ -436,42 +534,7 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
     state = state.copyWith(resolutionOverrides: next);
   }
 
-  /// Snapshots everything about how the video looks and behaves - but not
-  /// the actual cover image(s)/song(s)/output directory - so it can be
-  /// reapplied to a different release later.
-  RenderTemplate captureTemplate(String name) {
-    return RenderTemplate(
-      name: name,
-      releaseMode: state.releaseMode,
-      placement: state.placement,
-      style: state.style,
-      visualizerColorHex: state.visualizerColorHex,
-      blurRadius: state.blurRadius,
-      visualizerSmoothness: state.visualizerSmoothness,
-      showCover: state.showCover,
-      coverSizeFraction: state.coverSizeFraction,
-      coverTransform: state.coverTransform,
-      showLogo: state.showLogo,
-      logoImagePath: state.logoImagePath,
-      logoTransform: state.logoTransform,
-      showText: state.showText,
-      textContent: state.textContent,
-      textTransform: state.textTransform,
-      showQrCode: state.showQrCode,
-      qrCodeContent: state.qrCodeContent,
-      qrCaptionText: state.qrCaptionText,
-      qrCaptionPosition: state.qrCaptionPosition,
-      qrTransform: state.qrTransform,
-      fadeInSeconds: state.fadeInSeconds,
-      fadeOutSeconds: state.fadeOutSeconds,
-      fullDuration: state.fullDuration,
-      vintageEffect: state.vintageEffect,
-      selectedPresetIds: state.selectedPresetIds,
-      resolutionOverrides: state.resolutionOverrides,
-      useHardwareAcceleration: state.useHardwareAcceleration,
-      losslessAudio: state.losslessAudio,
-    );
-  }
+  RenderTemplate captureTemplate(String name) => templateFromDraft(state, name);
 
   /// Applies a saved template's style on top of the current draft, leaving
   /// the cover image(s)/song(s)/output directory untouched - the whole point
@@ -482,8 +545,12 @@ class DraftSettingsNotifier extends Notifier<DraftSettings> {
       placement: template.placement,
       style: template.style,
       visualizerColorHex: template.visualizerColorHex,
+      visualizerGradient: template.visualizerGradient,
+      visualizerGradientColorHex: template.visualizerGradientColorHex,
       blurRadius: template.blurRadius,
       visualizerSmoothness: template.visualizerSmoothness,
+      visualizerSensitivity: template.visualizerSensitivity,
+      visualizerBarCount: template.visualizerBarCount,
       showCover: template.showCover,
       coverSizeFraction: template.coverSizeFraction,
       coverTransform: template.coverTransform,
@@ -522,19 +589,21 @@ class TemplatesNotifier extends Notifier<List<RenderTemplate>> {
   List<RenderTemplate> build() {
     _store = TemplateStoreService();
     _load();
-    return [];
+    return [...builtInTemplates];
   }
 
   Future<void> _load() async {
-    state = await _store.loadAll();
+    state = [...builtInTemplates, ...await _store.loadAll()];
   }
 
   Future<void> save(RenderTemplate template) async {
-    state = await _store.save(template);
+    if (template.name == builtInDefaultTemplateName) return;
+    state = [...builtInTemplates, ...await _store.save(template)];
   }
 
   Future<void> delete(String name) async {
-    state = await _store.delete(name);
+    if (builtInTemplates.any((t) => t.name == name)) return;
+    state = [...builtInTemplates, ...await _store.delete(name)];
   }
 }
 

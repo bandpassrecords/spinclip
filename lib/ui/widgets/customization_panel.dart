@@ -10,8 +10,16 @@ class CustomizationPanel extends StatelessWidget {
   final ValueChanged<double> onBlurChanged;
   final double visualizerSmoothness;
   final ValueChanged<double> onVisualizerSmoothnessChanged;
+  final double visualizerSensitivity;
+  final ValueChanged<double> onVisualizerSensitivityChanged;
+  final int visualizerBarCount;
+  final ValueChanged<int> onVisualizerBarCountChanged;
   final String visualizerColorHex;
   final ValueChanged<String> onVisualizerColorChanged;
+  final bool visualizerGradient;
+  final ValueChanged<bool> onVisualizerGradientChanged;
+  final String visualizerGradientColorHex;
+  final ValueChanged<String> onVisualizerGradientColorChanged;
   final String? coverImagePath;
   final bool vintageEffect;
   final ValueChanged<bool> onVintageEffectChanged;
@@ -46,8 +54,16 @@ class CustomizationPanel extends StatelessWidget {
     required this.onBlurChanged,
     required this.visualizerSmoothness,
     required this.onVisualizerSmoothnessChanged,
+    required this.visualizerSensitivity,
+    required this.onVisualizerSensitivityChanged,
+    required this.visualizerBarCount,
+    required this.onVisualizerBarCountChanged,
     required this.visualizerColorHex,
     required this.onVisualizerColorChanged,
+    required this.visualizerGradient,
+    required this.onVisualizerGradientChanged,
+    required this.visualizerGradientColorHex,
+    required this.onVisualizerGradientColorChanged,
     required this.coverImagePath,
     required this.vintageEffect,
     required this.onVintageEffectChanged,
@@ -103,10 +119,46 @@ class CustomizationPanel extends StatelessWidget {
           label: '${(visualizerSmoothness * 100).round()}%',
           onChanged: onVisualizerSmoothnessChanged,
         ),
+        Text(
+          l10n.visualizerSensitivityLabel(
+            visualizerSensitivity.toStringAsFixed(1),
+          ),
+        ),
+        Slider(
+          value: visualizerSensitivity,
+          min: 1,
+          max: 3,
+          divisions: 20,
+          label: '${visualizerSensitivity.toStringAsFixed(1)}x',
+          onChanged: onVisualizerSensitivityChanged,
+        ),
+        Text(
+          visualizerBarCount == 0
+              ? l10n.visualizerBarCountAuto
+              : l10n.visualizerBarCountLabel(visualizerBarCount),
+        ),
+        // Leftmost stop (8) means "Auto" (stored as 0), then 16-160 bars in
+        // steps of 8.
+        Slider(
+          value: visualizerBarCount == 0
+              ? 8
+              : visualizerBarCount.clamp(16, 160).toDouble(),
+          min: 8,
+          max: 160,
+          divisions: 19,
+          label: visualizerBarCount == 0
+              ? l10n.visualizerBarCountAutoShort
+              : visualizerBarCount.toString(),
+          onChanged: (v) => onVisualizerBarCountChanged(v <= 8 ? 0 : v.round()),
+        ),
         const SizedBox(height: 8),
         VisualizerColorPicker(
           colorHex: visualizerColorHex,
           onColorChanged: onVisualizerColorChanged,
+          gradient: visualizerGradient,
+          onGradientChanged: onVisualizerGradientChanged,
+          gradientColorHex: visualizerGradientColorHex,
+          onGradientColorChanged: onVisualizerGradientColorChanged,
           coverImagePath: coverImagePath,
         ),
         const SizedBox(height: 8),

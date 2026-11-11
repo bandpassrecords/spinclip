@@ -1,6 +1,13 @@
 import '../l10n/generated/app_localizations.dart';
 
-enum VisualizerStyle { bars, lineSpectrum, fluidWave, oscilloscope }
+enum VisualizerStyle {
+  bars,
+  lineSpectrum,
+  fluidWave,
+  oscilloscope,
+  neonGlow,
+  cartoon,
+}
 
 extension VisualizerStyleLabel on VisualizerStyle {
   String label(AppLocalizations l10n) {
@@ -13,6 +20,10 @@ extension VisualizerStyleLabel on VisualizerStyle {
         return l10n.styleFluidWave;
       case VisualizerStyle.oscilloscope:
         return l10n.styleOscilloscope;
+      case VisualizerStyle.neonGlow:
+        return l10n.styleNeonGlow;
+      case VisualizerStyle.cartoon:
+        return l10n.styleCartoon;
     }
   }
 }

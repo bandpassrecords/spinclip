@@ -11,11 +11,25 @@ class RenderSettings {
   final VisualizerPlacement placement;
   final VisualizerStyle style;
   final String visualizerColorHex; // e.g. '0x33CCFF'
-  final double blurRadius; // boxblur luma_radius
+
+  /// When set, the visualizer blends from [visualizerColorHex] where the bars
+  /// start (the frame edge) to [visualizerGradientColorHex] at their tips.
+  final bool visualizerGradient;
+  final String visualizerGradientColorHex;
+  final double blurRadius; // background Gaussian blur strength (0-40)
 
   /// 0.0 (choppy, default ffmpeg behavior) to 1.0 (very smooth). Maps to
   /// showfreqs' `averaging` (frame-count smoothing) for bar/line styles.
   final double visualizerSmoothness;
+
+  /// 1.0 (neutral) to 3.0: how strongly the visualizer reacts. Affects only
+  /// the visualizer, never the soundtrack; see FiltergraphBuilder for how
+  /// each style applies it.
+  final double visualizerSensitivity;
+
+  /// Number of discrete bars for the bar styles (bars, neon glow, cartoon).
+  /// 0 means "auto": each style's own default look.
+  final int visualizerBarCount;
 
   final bool showCover;
 
@@ -68,8 +82,12 @@ class RenderSettings {
     this.placement = VisualizerPlacement.bottomBand,
     this.style = VisualizerStyle.bars,
     this.visualizerColorHex = '0x33CCFF',
+    this.visualizerGradient = false,
+    this.visualizerGradientColorHex = '0xFF3366',
     this.blurRadius = 20,
-    this.visualizerSmoothness = 0.5,
+    this.visualizerSmoothness = 0,
+    this.visualizerSensitivity = 1.0,
+    this.visualizerBarCount = 48,
     this.showCover = true,
     this.coverSizeFraction = 0.82,
     this.coverTransform = ElementTransform.center,
@@ -99,8 +117,12 @@ class RenderSettings {
     VisualizerPlacement? placement,
     VisualizerStyle? style,
     String? visualizerColorHex,
+    bool? visualizerGradient,
+    String? visualizerGradientColorHex,
     double? blurRadius,
     double? visualizerSmoothness,
+    double? visualizerSensitivity,
+    int? visualizerBarCount,
     bool? showCover,
     double? coverSizeFraction,
     ElementTransform? coverTransform,
@@ -129,8 +151,14 @@ class RenderSettings {
       placement: placement ?? this.placement,
       style: style ?? this.style,
       visualizerColorHex: visualizerColorHex ?? this.visualizerColorHex,
+      visualizerGradient: visualizerGradient ?? this.visualizerGradient,
+      visualizerGradientColorHex:
+          visualizerGradientColorHex ?? this.visualizerGradientColorHex,
       blurRadius: blurRadius ?? this.blurRadius,
       visualizerSmoothness: visualizerSmoothness ?? this.visualizerSmoothness,
+      visualizerSensitivity:
+          visualizerSensitivity ?? this.visualizerSensitivity,
+      visualizerBarCount: visualizerBarCount ?? this.visualizerBarCount,
       showCover: showCover ?? this.showCover,
       coverSizeFraction: coverSizeFraction ?? this.coverSizeFraction,
       coverTransform: coverTransform ?? this.coverTransform,
@@ -168,8 +196,12 @@ class RenderSettings {
       placement: placement,
       style: style,
       visualizerColorHex: visualizerColorHex,
+      visualizerGradient: visualizerGradient,
+      visualizerGradientColorHex: visualizerGradientColorHex,
       blurRadius: blurRadius,
       visualizerSmoothness: visualizerSmoothness,
+      visualizerSensitivity: visualizerSensitivity,
+      visualizerBarCount: visualizerBarCount,
       showCover: showCover,
       coverSizeFraction: coverSizeFraction,
       coverTransform: coverTransform,
@@ -207,8 +239,12 @@ class RenderSettings {
         other.placement == placement &&
         other.style == style &&
         other.visualizerColorHex == visualizerColorHex &&
+        other.visualizerGradient == visualizerGradient &&
+        other.visualizerGradientColorHex == visualizerGradientColorHex &&
         other.blurRadius == blurRadius &&
         other.visualizerSmoothness == visualizerSmoothness &&
+        other.visualizerSensitivity == visualizerSensitivity &&
+        other.visualizerBarCount == visualizerBarCount &&
         other.showCover == showCover &&
         other.coverSizeFraction == coverSizeFraction &&
         other.coverTransform == coverTransform &&
@@ -239,9 +275,13 @@ class RenderSettings {
     placement,
     style,
     visualizerColorHex,
+    visualizerGradient,
+    visualizerGradientColorHex,
     Object.hash(
       blurRadius,
       visualizerSmoothness,
+      visualizerSensitivity,
+      visualizerBarCount,
       showCover,
       coverSizeFraction,
       coverTransform,

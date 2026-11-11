@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import '../models/audio_info.dart';
 import 'ffmpeg_locator.dart';
 
 class AudioProbeService {
@@ -28,6 +29,34 @@ class AudioProbeService {
       throw Exception('Could not parse duration from ffprobe output: "$text"');
     }
     return value;
+  }
+
+  /// Returns [audioPath]'s technical details (codec, sample rate, bit depth,
+  /// channels, bitrate, size, duration, title/artist tags), via ffprobe.
+  Future<AudioInfo> probeInfo(String audioPath) async {
+    final paths = await locator.resolve();
+    final raw = await runFfprobeRaw(paths.ffprobe, [
+      '-v',
+      'error',
+      '-show_format',
+      '-show_streams',
+      '-select_streams',
+      'a:0',
+      '-of',
+      'json',
+      audioPath,
+    ]);
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(raw);
+    } on FormatException {
+      throw Exception('ffprobe could not read $audioPath');
+    }
+    if (decoded is! Map<String, dynamic> ||
+        (decoded['streams'] as List?)?.isEmpty != false) {
+      throw Exception('No audio stream found in $audioPath');
+    }
+    return AudioInfo.fromFfprobeJson(decoded);
   }
 }
 

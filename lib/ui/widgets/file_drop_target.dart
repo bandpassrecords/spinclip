@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -12,12 +14,16 @@ class FileDropTarget extends StatefulWidget {
   final List<String> allowedExtensions;
   final ValueChanged<String> onFileSelected;
 
+  /// Show the picked file as an image thumbnail (for cover/logo pickers).
+  final bool showImagePreview;
+
   const FileDropTarget({
     super.key,
     required this.label,
     required this.selectedPath,
     required this.allowedExtensions,
     required this.onFileSelected,
+    this.showImagePreview = false,
   });
 
   @override
@@ -63,7 +69,10 @@ class _FileDropTargetState extends State<FileDropTarget> {
           ),
           child: Row(
             children: [
-              Icon(hasFile ? Icons.check_circle : Icons.upload_file),
+              if (hasFile && widget.showImagePreview)
+                _ImageThumbnail(path: widget.selectedPath!)
+              else
+                Icon(hasFile ? Icons.check_circle : Icons.upload_file),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -77,6 +86,34 @@ class _FileDropTargetState extends State<FileDropTarget> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ImageThumbnail extends StatelessWidget {
+  final String path;
+
+  const _ImageThumbnail({required this.path});
+
+  @override
+  Widget build(BuildContext context) {
+    const size = 96.0;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: Image.file(
+        File(path),
+        // Re-read when the same path is picked again after being edited.
+        key: ValueKey(path),
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        cacheWidth: 192,
+        errorBuilder: (_, _, _) => const SizedBox(
+          width: size,
+          height: size,
+          child: Icon(Icons.broken_image_outlined),
         ),
       ),
     );

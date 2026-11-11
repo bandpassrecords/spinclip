@@ -120,6 +120,22 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String visualizerSensitivityLabel(String value) {
+    return 'Sensibilidade do visualizador: ${value}x';
+  }
+
+  @override
+  String visualizerBarCountLabel(int count) {
+    return 'Número de barras: $count';
+  }
+
+  @override
+  String get visualizerBarCountAuto => 'Número de barras: Automático';
+
+  @override
+  String get visualizerBarCountAutoShort => 'Auto';
+
+  @override
   String get showCoverArt => 'Mostrar capa';
 
   @override
@@ -191,6 +207,33 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get previewExcerptButton => 'Ouvir o trecho selecionado';
+
+  @override
+  String get songInfoLoading => 'Lendo detalhes da música...';
+
+  @override
+  String get songInfoError =>
+      'Não foi possível ler este arquivo. Verifique se é um arquivo de áudio compatível.';
+
+  @override
+  String get playSongButton => 'Tocar música';
+
+  @override
+  String get channelsMono => 'Mono';
+
+  @override
+  String get channelsStereo => 'Estéreo';
+
+  @override
+  String channelsCount(int count) {
+    return '$count canais';
+  }
+
+  @override
+  String get audioLossless => 'Sem perdas';
+
+  @override
+  String get audioLossy => 'Com perdas';
 
   @override
   String get addSong => 'Adicionar música';
@@ -298,6 +341,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get styleOscilloscope => 'Osciloscópio';
 
   @override
+  String get styleNeonGlow => 'Neon Brilhante';
+
+  @override
+  String get styleCartoon => 'Desenho Animado';
+
+  @override
   String get reviewSummaryTitle => 'Resumo';
 
   @override
@@ -343,6 +392,25 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get extractingColor => 'Extraindo cor...';
+
+  @override
+  String get colorCustom => 'Personalizada…';
+
+  @override
+  String get colorPickerTitle => 'Escolha uma cor';
+
+  @override
+  String get colorPickerApply => 'Aplicar';
+
+  @override
+  String get visualizerGradientLabel => 'Degradê';
+
+  @override
+  String get visualizerGradientHint =>
+      'Mistura da borda para uma segunda cor nas pontas das barras';
+
+  @override
+  String get visualizerGradientColorLabel => 'Cor das pontas';
 
   @override
   String get vintageEffectLabel => 'Efeito vintage';
@@ -404,6 +472,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get loadTemplateButton => 'Carregar modelo';
+
+  @override
+  String get builtInDefaultTemplateLabel => 'Padrão do Spinclip (Barras 48)';
 
   @override
   String get saveAsTemplateButton => 'Salvar como modelo';

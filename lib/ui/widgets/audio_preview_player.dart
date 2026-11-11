@@ -24,6 +24,9 @@ class AudioPreviewPlayer extends ConsumerStatefulWidget {
   final double totalDurationSeconds;
   final Color waveColor;
 
+  /// Text beside the play button; defaults to "Preview excerpt".
+  final String? playLabel;
+
   const AudioPreviewPlayer({
     super.key,
     required this.audioPath,
@@ -31,6 +34,7 @@ class AudioPreviewPlayer extends ConsumerStatefulWidget {
     required this.endSeconds,
     required this.totalDurationSeconds,
     this.waveColor = const Color(0xFF33CCFF),
+    this.playLabel,
   });
 
   @override
@@ -205,7 +209,10 @@ class _AudioPreviewPlayerState extends ConsumerState<AudioPreviewPlayer> {
               icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
             ),
             const SizedBox(width: 8),
-            Text(AppLocalizations.of(context)!.previewExcerptButton),
+            Text(
+              widget.playLabel ??
+                  AppLocalizations.of(context)!.previewExcerptButton,
+            ),
           ],
         ),
       ],

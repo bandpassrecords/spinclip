@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 
 import '../../l10n/generated/app_localizations.dart';
 import '../../models/track.dart';
+import 'song_preview_card.dart';
 
 /// Lists the songs for multi-song/medley mode. In medley mode, each row
 /// also exposes start/duration fields for that song's excerpt ("trecho").
@@ -17,6 +18,9 @@ class TrackListEditor extends StatelessWidget {
   /// The release's shared cover image, shown as each track's thumbnail
   /// unless that track sets its own.
   final String? defaultImagePath;
+
+  /// Visualizer colour, used for each song's waveform.
+  final Color waveColor;
   final ValueChanged<List<String>> onAddTracks;
   final void Function(int index) onRemoveTrack;
   final void Function(int index, Track track) onUpdateTrack;
@@ -27,6 +31,7 @@ class TrackListEditor extends StatelessWidget {
     required this.isMedley,
     required this.defaultSnippetDuration,
     required this.defaultImagePath,
+    required this.waveColor,
     required this.onAddTracks,
     required this.onRemoveTrack,
     required this.onUpdateTrack,
@@ -52,6 +57,7 @@ class TrackListEditor extends StatelessWidget {
             track: tracks[i],
             isMedley: isMedley,
             defaultImagePath: defaultImagePath,
+            waveColor: waveColor,
             onRemove: () => onRemoveTrack(i),
             onUpdate: (t) => onUpdateTrack(i, t),
           ),
@@ -71,6 +77,7 @@ class _TrackRow extends StatelessWidget {
   final Track track;
   final bool isMedley;
   final String? defaultImagePath;
+  final Color waveColor;
   final VoidCallback onRemove;
   final ValueChanged<Track> onUpdate;
 
@@ -79,6 +86,7 @@ class _TrackRow extends StatelessWidget {
     required this.track,
     required this.isMedley,
     required this.defaultImagePath,
+    required this.waveColor,
     required this.onRemove,
     required this.onUpdate,
   });
@@ -196,6 +204,17 @@ class _TrackRow extends StatelessWidget {
                     onPressed: _clearCover,
                   ),
               ],
+            ),
+            const SizedBox(height: 8),
+            // Medley rows highlight and play just this song's excerpt.
+            SongPreviewCard(
+              audioPath: track.audioPath,
+              startSeconds: isMedley ? track.trimStartSeconds : 0,
+              endSeconds: isMedley
+                  ? track.trimStartSeconds + (track.trimDurationSeconds ?? 8)
+                  : null,
+              waveColor: waveColor,
+              showFileName: false,
             ),
             if (isMedley)
               Row(

@@ -42,7 +42,11 @@ void main() {
 
   test('trimmed duration adds -ss/-t before the audio input', () {
     final args = builder.buildArgs(
-      settings: baseSettings(fullDuration: false, trimStart: 10, trimDuration: 20),
+      settings: baseSettings(
+        fullDuration: false,
+        trimStart: 10,
+        trimDuration: 20,
+      ),
       width: 1920,
       height: 1080,
       audioDurationSeconds: 180,
@@ -96,6 +100,8 @@ void main() {
       VisualizerStyle.lineSpectrum: 'showfreqs',
       VisualizerStyle.fluidWave: 'showwaves',
       VisualizerStyle.oscilloscope: 'avectorscope',
+      VisualizerStyle.neonGlow: 'gblur',
+      VisualizerStyle.cartoon: 'dilation',
     };
 
     for (final entry in expectations.entries) {
@@ -107,7 +113,84 @@ void main() {
         outputPath: 'out.mp4',
       );
       final filterComplex = args[args.indexOf('-filter_complex') + 1];
-      expect(filterComplex, contains(entry.value), reason: '${entry.key} should use ${entry.value}');
+      expect(
+        filterComplex,
+        contains(entry.value),
+        reason: '${entry.key} should use ${entry.value}',
+      );
     }
+  });
+
+  test('visualizer colour is applied to every audio channel', () {
+    // A single colour only covers channel 1; showfreqs draws the rest white.
+    final args = builder.buildArgs(
+      settings: baseSettings(),
+      width: 1920,
+      height: 1080,
+      audioDurationSeconds: 180,
+      outputPath: 'out.mp4',
+    );
+    final filterComplex = args[args.indexOf('-filter_complex') + 1];
+    expect(filterComplex, contains('colors=0x33CCFF|0x33CCFF|'));
+  });
+
+  String filterFor(RenderSettings settings) {
+    final args = builder.buildArgs(
+      settings: settings,
+      width: 1920,
+      height: 1080,
+      audioDurationSeconds: 180,
+      outputPath: 'out.mp4',
+    );
+    return args[args.indexOf('-filter_complex') + 1];
+  }
+
+  test('bar count renders one spectrum column per bar', () {
+    final settings = baseSettings().copyWith(visualizerBarCount: 32);
+    final filter = filterFor(settings);
+    expect(filter, contains('showfreqs=s=32x'));
+    expect(filter, contains('flags=neighbor'));
+  });
+
+  test('sensitivity zooms the spectrum around its middle', () {
+    // bottomBand at 1080p is 238px tall; 2x draws it 476px and keeps the
+    // centre slice.
+    final neutral = filterFor(baseSettings().copyWith(visualizerBarCount: 0));
+    expect(neutral, contains('crop=1920:238:0:0'));
+    final zoomed = filterFor(
+      baseSettings().copyWith(
+        visualizerBarCount: 0,
+        visualizerSensitivity: 2.0,
+      ),
+    );
+    expect(zoomed, contains('showfreqs=s=1920x476'));
+    expect(zoomed, contains('crop=1920:238:0:119'));
+  });
+
+  test('visualizer input is mixed to mono, except the stereo oscilloscope', () {
+    expect(
+      filterFor(baseSettings()),
+      contains('[0:a]aformat=channel_layouts=mono,'),
+    );
+    expect(
+      filterFor(baseSettings(style: VisualizerStyle.oscilloscope)),
+      isNot(contains('channel_layouts=mono')),
+    );
+  });
+
+  test('background uses a Gaussian blur scaled from blurRadius', () {
+    expect(filterFor(baseSettings()), contains('gblur=sigma=16:steps=3[bg]'));
+  });
+
+  test('gradient draws white and multiplies by a two-color gradient', () {
+    final filter = filterFor(
+      baseSettings().copyWith(
+        visualizerGradient: true,
+        visualizerGradientColorHex: '0xFF3366',
+      ),
+    );
+    expect(filter, contains('colors=0xFFFFFF|'));
+    expect(filter, contains('c0=0x33CCFF:c1=0xFF3366'));
+    expect(filter, contains('blend=all_mode=multiply'));
   });
 }

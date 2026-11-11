@@ -38,6 +38,13 @@ class _TemplateComboBoxState extends State<TemplateComboBox> {
       _selectedName = null;
     }
 
+    String label(RenderTemplate t) =>
+        t.builtIn ? l10n.builtInDefaultTemplateLabel : t.name;
+    final selected = widget.templates
+        .where((t) => t.name == _selectedName)
+        .firstOrNull;
+    final hasSaved = widget.templates.any((t) => !t.builtIn);
+
     return Row(
       children: [
         Expanded(
@@ -46,14 +53,14 @@ class _TemplateComboBoxState extends State<TemplateComboBox> {
             isExpanded: true,
             decoration: InputDecoration(
               labelText: l10n.loadTemplateButton,
-              hintText: widget.templates.isEmpty ? l10n.noTemplatesSaved : null,
+              hintText: hasSaved ? null : l10n.noTemplatesSaved,
               border: const OutlineInputBorder(),
             ),
             items: [
               for (final template in widget.templates)
                 DropdownMenuItem(
                   value: template.name,
-                  child: Text(template.name, overflow: TextOverflow.ellipsis),
+                  child: Text(label(template), overflow: TextOverflow.ellipsis),
                 ),
             ],
             onChanged: widget.templates.isEmpty
@@ -68,7 +75,7 @@ class _TemplateComboBoxState extends State<TemplateComboBox> {
                   },
           ),
         ),
-        if (_selectedName != null)
+        if (selected != null && !selected.builtIn)
           IconButton(
             icon: const Icon(Icons.delete_outline),
             tooltip: l10n.deleteTemplateTooltip,
