@@ -1,0 +1,31 @@
+[
+  {
+    "label": "Getting started",
+    "items": [
+      { "label": "What Spinclip does", "link": "/guide/overview/" },
+      { "label": "Installation", "link": "/guide/installation/" },
+      { "label": "Your first video", "link": "/guide/first-video/" }
+    ]
+  },
+  {
+    "label": "The wizard, step by step",
+    "items": [
+      { "label": "Release type", "link": "/guide/release-types/" },
+      { "label": "Files", "link": "/guide/files/" },
+      { "label": "Visualizer", "link": "/guide/visualizer/" },
+      { "label": "Customize", "link": "/guide/customize/" },
+      { "label": "Duration", "link": "/guide/duration/" },
+      { "label": "Platforms", "link": "/guide/platforms/" },
+      { "label": "Output & performance", "link": "/guide/output/" },
+      { "label": "Review & render", "link": "/guide/render/" }
+    ]
+  },
+  {
+    "label": "More",
+    "items": [
+      { "label": "Templates", "link": "/guide/templates/" },
+      { "label": "Language", "link": "/guide/language/" },
+      { "label": "Troubleshooting", "link": "/guide/troubleshooting/" }
+    ]
+  }
+]

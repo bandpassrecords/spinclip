@@ -16,6 +16,8 @@ CI enforces this — a tag push fails immediately if `CHANGELOG.md` has no match
    - Builds an unsigned Windows zip + unsigned Windows MSIX + unsigned Windows Inno Setup
      installer (`installer.iss` at repo root), an unsigned macOS zip, and a Linux tarball, each
      with a `.sha256` checksum, and attaches them to the release.
+   - Rebuilds the website (`.github/workflows/site.yml`), whose download buttons point at the
+     newest release's files. See `website/README.md`.
 
 Every pull request against `main` also runs the test suite and a Windows build check
 (`test_pr_build`), independent of tagging.
