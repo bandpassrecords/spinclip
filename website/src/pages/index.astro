@@ -1,0 +1,399 @@
+---
+import Base from '../layouts/Base.astro';
+import { latestDownloads, releasesUrl, repoUrl } from '../lib/release';
+import { changelog } from '../lib/changelog';
+
+const downloads = await latestDownloads();
+const [latest] = changelog();
+const latestVersion = latest?.version;
+
+const shot = (name: string) => `/resources/screenshots/${name}`;
+const example = (name: string) => `/resources/examples/${name}`;
+
+// The seven export presets (lib/models/platform_preset.dart).
+const platforms = [
+  { name: 'YouTube', ratio: '16:9', w: 16, h: 9 },
+  { name: 'Facebook Feed', ratio: '16:9', w: 16, h: 9 },
+  { name: 'Instagram Feed', ratio: '1:1', w: 1, h: 1 },
+  { name: 'Instagram Portrait', ratio: '4:5', w: 4, h: 5 },
+  { name: 'Reels & Stories', ratio: '9:16', w: 9, h: 16 },
+  { name: 'TikTok', ratio: '9:16', w: 9, h: 16 },
+  { name: 'Spotify Canvas', ratio: '9:16 loop', w: 9, h: 16 },
+];
+
+const steps = [
+  {
+    title: 'Pick a release type',
+    text: 'One song, a batch of songs that each get their own video, or a medley of excerpts back to back.',
+    image: shot('release-type.png'),
+    alt: 'The Release type step: single song, multiple songs or medley',
+  },
+  {
+    title: 'Drop in a cover and a song',
+    text: 'PNG or JPG artwork and WAV, MP3, FLAC, OGG, AIFF or M4A audio. Spinclip reads the song’s details and draws its waveform.',
+    image: shot('files-single.png'),
+    alt: 'The Files step with a cover image, the song’s details and its waveform',
+  },
+  {
+    title: 'Tick the platforms',
+    text: 'Every platform you tick gets its own video at the right size — from the same settings, in one go.',
+    image: shot('platforms.png'),
+    alt: 'The Platforms step with Instagram, YouTube and Spotify Canvas selected',
+  },
+  {
+    title: 'Render',
+    text: 'FFmpeg renders on your computer, on the graphics card when there is one. The videos land in a folder named after the release.',
+    image: shot('rendering.png'),
+    alt: 'A render in progress, with its progress bar and a Cancel button',
+  },
+];
+
+const styles = [
+  { name: 'Bars', text: 'The classic spectrum: 16 to 160 bars, or Auto.', image: 'style-bars.jpg' },
+  { name: 'Neon Glow', text: 'Bars with a soft glow spilling onto the artwork.', image: 'style-neonGlow.jpg' },
+  { name: 'Cartoon', text: 'Chunky bars with a darker outline.', image: 'style-cartoon.jpg' },
+  { name: 'Line Spectrum', text: 'A single bright line tracing the frequencies.', image: 'style-lineSpectrum.jpg' },
+  { name: 'Fluid Wave', text: 'The waveform itself, mirrored around a centre line.', image: 'style-fluidWave.jpg' },
+  { name: 'Oscilloscope', text: 'The stereo image, drawn as a vector scope.', image: 'style-oscilloscope.jpg' },
+];
+
+const placements = [
+  { name: 'Bottom Band', text: 'Along the bottom edge, under the cover.', image: 'placement-bottomBand.jpg' },
+  { name: 'Dual Mirrored Bottom', text: 'Reflected up and down from a line near the bottom.', image: 'placement-dualMirroredBottom.jpg' },
+  { name: 'Side Border', text: 'Rising up the left edge of the frame.', image: 'placement-sideBorder.jpg' },
+  { name: 'Full Frame Border', text: 'Top and bottom edges at once.', image: 'placement-fullFrameBorder.jpg' },
+  { name: 'Ascending Corner', text: 'A compact meter in the bottom corner.', image: 'placement-ascendingCorner.jpg' },
+  { name: 'Centered Behind Text', text: 'In the middle of the frame, behind your title.', image: 'placement-centeredBehindText.jpg' },
+  { name: 'Cover Center + Side Bars', text: 'Columns on both sides of the cover.', image: 'placement-coverCenterDualBars.jpg' },
+];
+
+const finishing = [
+  { name: 'Gradient', text: 'Blend from the edge into a second colour at the bar tips.', image: 'gradient.jpg' },
+  { name: 'Logo, title and QR code', text: 'Your label’s mark, the song’s name and a code that opens the release.', image: 'overlays.jpg' },
+  { name: 'Vintage look', text: 'A warm tone, soft vignette and light film grain.', image: 'vintage.jpg' },
+];
+
+interface Tile {
+  size: 'wide' | 'half' | 'third' | 'full';
+  kicker: string;
+  title: string;
+  text: string;
+  image?: string;
+  alt?: string;
+  tags?: string[];
+}
+
+const tiles: Tile[] = [
+  {
+    size: 'wide',
+    kicker: 'Batches',
+    title: 'A whole EP in one render',
+    text: 'Add every song of the release: each one gets its own video for every platform, and each can bring its own cover.',
+    image: shot('files-batch.png'),
+    alt: 'Multiple songs, each with its own cover, details and waveform',
+  },
+  {
+    size: 'third',
+    kicker: 'Private',
+    title: 'Nothing leaves your computer',
+    text: 'No account, no upload, no watermark, no queue. FFmpeg comes bundled on Windows and macOS.',
+    tags: ['Offline', 'No sign-up', 'No watermark'],
+  },
+  {
+    size: 'half',
+    kicker: 'Medley',
+    title: 'A teaser for the whole release',
+    text: 'Pick an excerpt of each song: they play back to back as one combined video per platform.',
+    image: shot('files-medley.png'),
+    alt: 'Medley mode, with the chosen excerpt highlighted on each song’s waveform',
+  },
+  {
+    size: 'half',
+    kicker: 'Duration',
+    title: 'The whole song, or the hook',
+    text: 'Render the full track, or drag the range to the part that sells it — and play the excerpt before you commit.',
+    image: shot('duration.png'),
+    alt: 'The Duration step with a 20-second excerpt selected on the waveform',
+  },
+  {
+    size: 'third',
+    kicker: 'Templates',
+    title: 'Your look, saved',
+    text: 'Save the style as a template and load it on the next release: same colours, overlays and platforms, new cover and song.',
+    image: shot('review.png'),
+    alt: 'Review & render, saving the settings as a template',
+  },
+  {
+    size: 'third',
+    kicker: 'Quality',
+    title: 'Fast, and lossless where it counts',
+    text: 'GPU encoding (NVENC, Quick Sync, AMF) with a software fallback, and uncompressed PCM audio by default.',
+    image: shot('output.png'),
+    alt: 'Output & performance: output folder, hardware encoding and lossless audio',
+  },
+  {
+    size: 'third',
+    kicker: 'Languages',
+    title: 'English, Português, Español',
+    text: 'Switch from the title bar, or follow the system’s language.',
+    image: shot('release-type-pt.png'),
+    alt: 'Spinclip in Portuguese',
+  },
+];
+---
+<Base
+    page="home"
+    title="Spinclip — Promo videos for your music releases"
+    description="Spinclip turns a cover image and a song into an audio-reactive promo video, sized for YouTube, Instagram, TikTok and Spotify Canvas. Free, for Windows, macOS and Linux."
+>
+    <section class="hero">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="container hero-content">
+            {latestVersion && (
+            <a href="/changelog/" class="hero-pill"><b>v{latestVersion}</b> A rebuilt visualizer: new styles, gradients, sharper bars →</a>
+            )}
+            <h1 class="hero-title">A cover and a song in.<br><span class="gradient-text">A promo video out.</span></h1>
+            <p class="hero-subtitle">Spinclip renders audio-reactive visualizer videos for your releases — sized for YouTube, Instagram, TikTok and Spotify Canvas, all at once, on your own computer.</p>
+            <div class="hero-buttons">
+                <a href="#download" class="btn btn-primary">Download free</a>
+                <a href="#how" class="btn btn-secondary">See how it works</a>
+            </div>
+            <p class="hero-meta">Windows · macOS · Linux — free, no account, no watermark</p>
+
+            <div class="hero-stage">
+                <div class="frame" id="hero-frame">
+                    <video id="hero-video" src={example('hero.mp4')} poster={example('hero.jpg')} autoplay muted loop playsinline width="1280" height="720" aria-label="A promo video made with Spinclip: the cover over its blurred self, with bars moving to the music"></video>
+                    <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="false">
+                        <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+                        <span id="sound-label">Play with sound</span>
+                    </button>
+                </div>
+                <p class="hero-caption">Rendered by Spinclip from one cover and one song. Demo artwork and music made for this page.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="platforms-strip" aria-label="Platforms">
+        <div class="container">
+            <p>One render, every format a release goes out in</p>
+            <ul class="chips">
+                {platforms.map((p) => (
+                <li>
+                    <span class="shape" style={`width:${Math.round((p.w / Math.max(p.w, p.h)) * 16)}px;height:${Math.round((p.h / Math.max(p.w, p.h)) * 16)}px`} aria-hidden="true"></span>
+                    {p.name} <span class="ratio">{p.ratio}</span>
+                </li>
+                ))}
+            </ul>
+        </div>
+    </section>
+
+    <section id="how">
+        <div class="container">
+            <div class="section-head">
+                <span class="eyebrow">How it works</span>
+                <h2 class="section-title">Four steps from artwork to upload</h2>
+                <p class="section-subtitle">The easy path asks only what it needs. Every other setting starts at a sensible default, and the preview beside each step is a real frame of the final video.</p>
+            </div>
+            <div class="how-grid">
+                <div>
+                    <ol class="steps" role="tablist" aria-label="Steps">
+                        {steps.map((step, i) => (
+                        <li>
+                            <button class="step" role="tab" type="button" aria-selected={i === 0 ? 'true' : 'false'} data-step={i}>
+                                <span class="step-num">{i + 1}</span>
+                                <span>
+                                    <h3>{step.title}</h3>
+                                    <p>{step.text}</p>
+                                </span>
+                            </button>
+                        </li>
+                        ))}
+                    </ol>
+                    <p class="how-note">Want more control? Turn on <b>Advanced settings</b> for the visualizer, colours, overlays, timing and export options.</p>
+                </div>
+                <div class="how-shot frame">
+                    {steps.map((step, i) => (
+                    <img src={step.image} alt={step.alt} class={i === 0 ? 'active' : undefined} data-step={i} width="1920" height="1200" loading={i === 0 ? 'eager' : 'lazy'}>
+                    ))}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="formats">
+        <div class="container">
+            <div class="section-head">
+                <span class="eyebrow">Every shape</span>
+                <h2 class="section-title">One release, framed for every feed</h2>
+                <p class="section-subtitle">The same cover and song, laid out again for each platform’s shape — not a crop of one video.</p>
+            </div>
+            <div class="shapes">
+                <figure style="--w:16;--ratio:16/9">
+                    <div class="frame"><img src={example('platform-youtube.jpg')} alt="A 16:9 video for YouTube" loading="lazy" data-zoom></div>
+                    <figcaption><b>YouTube</b>16:9 · 1920×1080</figcaption>
+                </figure>
+                <figure style="--w:9;--ratio:1/1">
+                    <div class="frame"><img src={example('platform-square.jpg')} alt="A square video for the Instagram feed" loading="lazy" data-zoom></div>
+                    <figcaption><b>Instagram Feed</b>1:1 · 1080×1080</figcaption>
+                </figure>
+                <figure style="--w:7.2;--ratio:4/5">
+                    <div class="frame"><img src={example('platform-portrait.jpg')} alt="A 4:5 portrait video for Instagram" loading="lazy" data-zoom></div>
+                    <figcaption><b>Instagram Portrait</b>4:5 · 1080×1350</figcaption>
+                </figure>
+                <figure style="--w:5.06;--ratio:9/16">
+                    <div class="frame"><video src={example('platform-vertical.mp4')} poster={example('platform-vertical.jpg')} autoplay muted loop playsinline aria-label="A vertical 9:16 video for Reels, TikTok and Spotify Canvas"></video></div>
+                    <figcaption><b>Reels · TikTok · Canvas</b>9:16 · 1080×1920</figcaption>
+                </figure>
+            </div>
+        </div>
+    </section>
+
+    <section id="looks">
+        <div class="container">
+            <div class="section-head">
+                <span class="eyebrow">Looks</span>
+                <h2 class="section-title">Six styles. Seven placements.<br>Any colour.</h2>
+                <p class="section-subtitle">Pick from drawn preview cards, take the colour straight from the cover, and blend in a gradient. Every frame below came out of Spinclip.</p>
+            </div>
+            <div class="tabs-wrap">
+                <div class="tabs" role="tablist" aria-label="Looks">
+                    <button class="tab" role="tab" type="button" aria-selected="true" aria-controls="looks-styles" id="tab-styles">Styles</button>
+                    <button class="tab" role="tab" type="button" aria-selected="false" aria-controls="looks-placements" id="tab-placements">Placements</button>
+                    <button class="tab" role="tab" type="button" aria-selected="false" aria-controls="looks-finishing" id="tab-finishing">Finishing touches</button>
+                </div>
+            </div>
+            <div class="gallery" id="looks-styles" role="tabpanel" aria-labelledby="tab-styles">
+                {styles.map((look) => (
+                <article class="look">
+                    <img src={example(look.image)} alt={`${look.name} visualizer style`} loading="lazy" width="960" height="540" data-zoom>
+                    <div class="look-copy"><h3>{look.name}</h3><p>{look.text}</p></div>
+                </article>
+                ))}
+            </div>
+            <div class="gallery" id="looks-placements" role="tabpanel" aria-labelledby="tab-placements" hidden>
+                {placements.map((look) => (
+                <article class="look">
+                    <img src={example(look.image)} alt={`${look.name} visualizer placement`} loading="lazy" width="960" height="540" data-zoom>
+                    <div class="look-copy"><h3>{look.name}</h3><p>{look.text}</p></div>
+                </article>
+                ))}
+            </div>
+            <div class="gallery" id="looks-finishing" role="tabpanel" aria-labelledby="tab-finishing" hidden>
+                {finishing.map((look) => (
+                <article class="look">
+                    <img src={example(look.image)} alt={look.name} loading="lazy" data-zoom>
+                    <div class="look-copy"><h3>{look.name}</h3><p>{look.text}</p></div>
+                </article>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <article class="spotlight">
+                <div class="spotlight-copy">
+                    <span class="eyebrow">Live preview</span>
+                    <h3>What you see is what renders</h3>
+                    <p>The preview beside every step is a frame of the real video, from the same FFmpeg pipeline the export uses — not a mock-up. Change a colour, move the logo, switch a platform: it updates.</p>
+                    <ul class="ticks">
+                        <li><b>Colour from the cover</b> in one click, or pick any colour you like.</li>
+                        <li><b>Drag the cover, logo, title and QR code</b> into place, and rotate them.</li>
+                        <li><b>Blur, cover size, bar count, sensitivity, fades</b> — when you want them.</li>
+                    </ul>
+                </div>
+                <div class="frame"><img src={shot('customize.png')} alt="The Customize step with a logo, a title and a QR code in the live preview" loading="lazy" width="1920" height="1200" data-zoom></div>
+            </article>
+            <article class="spotlight reverse">
+                <div class="spotlight-copy">
+                    <span class="eyebrow">Visualizer</span>
+                    <h3>Pick a look by seeing it</h3>
+                    <p>Placements and styles are cards drawn in your colour, so you can tell them apart at a glance — and the preview shows the one you picked on your own artwork.</p>
+                    <ul class="ticks">
+                        <li><b>Bars on a musical scale</b>: 60 Hz to 16 kHz, so the bass isn’t one tall bar on the left.</li>
+                        <li><b>Smooth or snappy</b>: set how fast the bars bounce.</li>
+                    </ul>
+                </div>
+                <div class="frame"><img src={shot('visualizer.png')} alt="The Visualizer step: placement and style cards, with Neon Glow selected" loading="lazy" width="1920" height="1200" data-zoom></div>
+            </article>
+        </div>
+    </section>
+
+    <section id="features">
+        <div class="container">
+            <div class="section-head">
+                <span class="eyebrow">Features</span>
+                <h2 class="section-title">Built for releases, not one-offs</h2>
+                <p class="section-subtitle">Singles, EPs and albums, with the same look on every video.</p>
+            </div>
+            <div class="bento">
+                {tiles.map((tile) => (
+                <article class={`tile tile-${tile.size}${tile.image ? '' : ' tile-text'}`}>
+                    <div class="tile-copy">
+                        <div class="kicker">{tile.kicker}</div>
+                        <h3>{tile.title}</h3>
+                        <p>{tile.text}</p>
+                    </div>
+                    {tile.image && (
+                    <div class="tile-shot"><img src={tile.image} alt={tile.alt} loading="lazy" width="1920" height="1200" data-zoom></div>
+                    )}
+                    {tile.tags && (
+                    <div class="tile-art">{tile.tags.map((tag) => <span>{tag}</span>)}</div>
+                    )}
+                </article>
+                ))}
+            </div>
+            <p class="section-more">Every step is explained in the <a href="/guide/overview/">user guide</a>.</p>
+        </div>
+    </section>
+
+    <section id="download" class="download">
+        <div class="container">
+            <div class="section-head">
+                <span class="eyebrow">Download{downloads.tag ? ` · ${downloads.tag}` : ''}</span>
+                <h2 class="section-title">Get Spinclip</h2>
+                <p class="section-subtitle">Free, for Windows, macOS and Linux.</p>
+            </div>
+            <div class="download-cards">
+                <div class="download-card" data-os="windows">
+                    <span class="yours">For this computer</span>
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.1 10.4 4v7.1H3V5.1Zm8.3-1.2L21 2.5v8.6h-9.7V3.9ZM3 12.9h7.4V20L3 18.9v-6Zm8.3 0H21v8.6l-9.7-1.4v-7.2Z"/></svg>
+                    <h3>Windows</h3>
+                    <p class="req">Windows 10 or later, 64-bit</p>
+                    <a href={downloads.windowsInstaller} class="btn btn-primary">Download the installer</a>
+                    <div class="alt-links">
+                        <a href={downloads.windowsZip}>Portable .zip</a>
+                        <a href={downloads.windowsMsix}>.msix package</a>
+                    </div>
+                    <p class="download-note">Not code-signed yet: Windows may say <b>Windows protected your PC</b> — choose <b>More info → Run anyway</b>.</p>
+                </div>
+                <div class="download-card" data-os="macos">
+                    <span class="yours">For this computer</span>
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.8 1.2 1.8 2.6 3.1 2.6 1.3-.1 1.7-.8 3.3-.8 1.5 0 2 .8 3.3.8 1.4 0 2.3-1.3 3.1-2.5.9-1.4 1.3-2.8 1.4-2.8-.1 0-2.6-1-2.5-4.2ZM13.9 4.9c.7-.8 1.2-2 1-3.2-1 0-2.2.7-3 1.5-.6.7-1.2 1.9-1 3.1 1.1.1 2.3-.6 3-1.4Z"/></svg>
+                    <h3>macOS</h3>
+                    <p class="req">macOS 10.15 or later</p>
+                    <a href={downloads.macos} class="btn btn-primary">Download for Mac (.zip)</a>
+                    <p class="download-note">Not notarized by Apple yet: the first time, open it from <b>System Settings → Privacy &amp; Security → Open Anyway</b>. On Apple silicon, macOS may offer to install Rosetta for the bundled FFmpeg.</p>
+                </div>
+                <div class="download-card" data-os="linux">
+                    <span class="yours">For this computer</span>
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.5 2c-2.2 0-3.4 1.8-3.4 4.3 0 1.5.2 2.4-.5 3.6-.8 1.3-2.7 3.4-2.8 6.1 0 .8.1 1.4.4 1.9-.6.4-1.7.6-2 1.3-.3.9.6 1.4 2 1.8 1.2.4 2.5.9 3.3.9.7 0 1.3-.4 1.6-.9.6.1 1.7.1 2.6 0 .4.6 1 .9 1.7.9 1 0 2-.6 3.1-1.4 1.1-.8 2.2-1.1 2.3-1.9.1-.7-.8-1.1-1.4-1.6.4-1.2.3-2.5-.2-3.8-.8-1.9-2.4-3.5-3-4.6-.5-1-.4-1.9-.5-3.4C15.6 3.5 14.7 2 12.5 2Z"/></svg>
+                    <h3>Linux</h3>
+                    <p class="req">64-bit, with FFmpeg installed</p>
+                    <a href={downloads.linux} class="btn btn-primary">Download .tar.gz</a>
+                    <p class="download-note">Spinclip uses your system’s FFmpeg on Linux: install it first, e.g. <b>sudo apt install ffmpeg</b>.</p>
+                </div>
+            </div>
+            <p class="download-info">Every release and its checksums are on <a href={releasesUrl}>GitHub</a>. Need a hand? Start with the <a href="/guide/installation/">installation guide</a>.</p>
+        </div>
+    </section>
+
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot">
+        <button class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
+        <img src="" alt="" id="lightbox-img">
+    </div>
+
+    <script>
+        import '../scripts/home.js';
+    </script>
+</Base>

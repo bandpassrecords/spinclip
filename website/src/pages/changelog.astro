@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import { changelog } from '../lib/changelog';
+import { releasesUrl } from '../lib/release';
+
+const releases = changelog();
+const dateFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+const shown = (date: string) => dateFormat.format(new Date(`${date}T00:00:00Z`));
+---
+<Base
+    page="changelog"
+    title="What's new — Spinclip"
+    description="What changed in each Spinclip release."
+>
+    <header class="page-head">
+        <div class="narrow">
+            <span class="eyebrow">Changelog</span>
+            <h1>What's new</h1>
+            <p class="lead">Every Spinclip release, newest first. The files for each one are on <a href={releasesUrl}>GitHub</a>.</p>
+        </div>
+    </header>
+
+    <main class="narrow" style="padding-bottom:5rem">
+        {releases.map((release, i) => (
+        <section class="release" id={`v${release.version}`} style="padding-inline:0">
+            <h2>
+                <a href={`#v${release.version}`}>v{release.version}</a>
+                {i === 0 && <span class="badge">Latest</span>}
+            </h2>
+            <p class="date"><time datetime={release.date}>{shown(release.date)}</time> · <a href={`${releasesUrl}/tag/v${release.version}`}>Downloads</a></p>
+            {release.sections.map((section) => (
+            <>
+                <h3>{section.title}</h3>
+                <ul>
+                    {section.items.map((item) => <li set:html={item} />)}
+                </ul>
+            </>
+            ))}
+        </section>
+        ))}
+    </main>
+</Base>

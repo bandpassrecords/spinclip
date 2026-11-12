@@ -1,5 +1,41 @@
 # Changelog
 
+## v0.3.0 — 2026-11-12
+
+### Highlights
+- **The bars are your colour now** — on stereo songs the visualizer drew a white band over the
+  chosen colour. It now reads a mono mix (the oscilloscope keeps stereo), and the colour covers
+  everything.
+- **A musical frequency scale** — spectrum styles show 60 Hz to 16 kHz on a logarithmic axis, so
+  the bass is no longer one huge bar on the far left.
+- **Two new styles** — Neon Glow (bars with a glow that spills onto the background) and Cartoon
+  (chunky bars with a darker outline).
+- **Gradients** — an optional second colour the bars blend into at their tips (edge, centre, edge
+  for the Fluid Wave).
+- **Number of bars and sensitivity** — flat-topped bars from 16 to 160, or Auto, and a
+  sensitivity control that zooms in on the loudness range.
+- **Faster bounce** — smoothing averages 1 to 7 frames instead of 2 to 16, and the Fluid Wave
+  draws at full brightness.
+- **Pick a look by seeing it** — placement and style are chosen from cards drawn in the current
+  colour instead of dropdowns, and a custom colour picker (saturation/brightness square, hue,
+  hex) joins the swatches.
+- **Song details on the Files step** — the cover's thumbnail and, for each song, its length,
+  codec, sample rate, bit depth, channels, bitrate, size and lossless/lossy, with its waveform
+  and a play button. Medley rows highlight and play their excerpt.
+- **A new default look** — Bars, 48 of them, smoothness 0, bottom band, cyan. It also ships as a
+  built-in template that can't be deleted or overwritten.
+- **Faster background blur** — Gaussian instead of box, about three times faster at the same
+  strength.
+- **A website** — [spinclip.bandpassrecords.com](https://spinclip.bandpassrecords.com), with a
+  user guide for every step.
+
+### Known gaps
+- Linux still relies on a system ffmpeg install on `PATH` — Windows and macOS bundle their own.
+- The ffmpeg bundled for macOS is an Intel build: on Apple silicon it runs through Rosetta.
+- Windows and macOS builds are still unsigned, so both show a warning on first run.
+
+---
+
 ## v0.2.0 — 2026-09-28
 
 ### Highlights

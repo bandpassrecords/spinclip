@@ -1,17 +1,27 @@
 # Spinclip
 
-Generate promo videos for music releases from a cover image and a song: a blurred/stretched
-background, a sharp cover overlay, and an FFmpeg-rendered audio-reactive visualizer.
+Promo videos for music releases, from a cover image and a song: the cover over a blurred,
+stretched copy of itself, with an FFmpeg-rendered visualizer that moves to the music — sized for
+YouTube, Instagram, TikTok, Facebook and Spotify Canvas in one render.
 
-## Getting Started
+**[spinclip.bandpassrecords.com](https://spinclip.bandpassrecords.com)** — downloads, examples
+and the [user guide](https://spinclip.bandpassrecords.com/guide/overview/).
 
-This is a Flutter desktop app (Windows/macOS/Linux) with a shared CLI (`bin/render_cli.dart`)
-driving the same render pipeline as the GUI.
+![The Spinclip window](resources/screenshots/visualizer.png)
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Development
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+A Flutter desktop app (Windows, macOS, Linux). The GUI and `bin/render_cli.dart` drive the same
+render pipeline (`lib/services/filtergraph_builder.dart`).
+
+```bash
+flutter pub get
+flutter run -d windows      # or macos, linux
+flutter analyze && flutter test
+```
+
+- [RELEASING.md](RELEASING.md) — versioning and the release workflow.
+- [website/README.md](website/README.md) — the website, and where its pictures come from.
+- `scripts/capture_screenshots.ps1` — retakes the website's screenshots and example videos from
+  the real app, on a demo release it generates itself.
+- `resources/tools/README.md` — the bundled ffmpeg.
